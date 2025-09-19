@@ -125,11 +125,11 @@ export default function AssetReviewPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/admin" className="flex items-center text-slate-600 hover:text-blue-900">
+              <Link href="/admin" className="flex items-center text-muted-foreground hover:text-primary">
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Admin Dashboard
               </Link>
@@ -156,7 +156,9 @@ export default function AssetReviewPage() {
                   alt={asset.title}
                   className="w-full h-96 object-cover rounded-lg"
                 />
-                <Badge className="absolute top-4 right-4 bg-blue-600">{asset.expectedYield}% Expected APY</Badge>
+                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
+                  {asset.expectedYield}% Expected APY
+                </Badge>
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {asset.images.map((image, index) => (
@@ -164,7 +166,7 @@ export default function AssetReviewPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`relative rounded-lg overflow-hidden ${
-                      selectedImage === index ? "ring-2 ring-blue-900" : ""
+                      selectedImage === index ? "ring-2 ring-primary" : ""
                     }`}
                   >
                     <img
@@ -181,44 +183,44 @@ export default function AssetReviewPage() {
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">{asset.title}</h1>
-                  <div className="flex items-center text-slate-600 mb-2">
+                  <h1 className="text-3xl font-bold text-foreground mb-2">{asset.title}</h1>
+                  <div className="flex items-center text-muted-foreground mb-2">
                     <MapPin className="h-5 w-5 mr-2" />
                     {asset.location}
                   </div>
-                  <p className="text-slate-600">
+                  <p className="text-muted-foreground">
                     Submitted by {asset.owner} on {asset.submittedDate}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-slate-900">${(asset.requestedValue / 1000000).toFixed(1)}M</p>
-                  <p className="text-slate-600">Requested Value</p>
+                  <p className="text-2xl font-bold text-foreground">${(asset.requestedValue / 1000000).toFixed(1)}M</p>
+                  <p className="text-muted-foreground">Requested Value</p>
                 </div>
               </div>
 
-              <p className="text-slate-700 text-lg leading-relaxed mb-6">{asset.description}</p>
+              <p className="text-foreground text-lg leading-relaxed mb-6">{asset.description}</p>
 
               {/* Key Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{asset.expectedYield}%</p>
-                  <p className="text-sm text-slate-600">Expected APY</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">{asset.expectedYield}%</p>
+                  <p className="text-sm text-muted-foreground">Expected APY</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">${asset.minInvestment}</p>
-                  <p className="text-sm text-slate-600">Min Investment</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <DollarSign className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">${asset.minInvestment}</p>
+                  <p className="text-sm text-muted-foreground">Min Investment</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <Shield className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{asset.riskAssessment.overallRisk}</p>
-                  <p className="text-sm text-slate-600">Risk Level</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <Shield className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">{asset.riskAssessment.overallRisk}</p>
+                  <p className="text-sm text-muted-foreground">Risk Level</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <FileText className="h-6 w-6 text-amber-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{asset.documents.length}</p>
-                  <p className="text-sm text-slate-600">Documents</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <FileText className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">{asset.documents.length}</p>
+                  <p className="text-sm text-muted-foreground">Documents</p>
                 </div>
               </div>
             </div>
@@ -242,8 +244,8 @@ export default function AssetReviewPage() {
                     <div className="grid grid-cols-2 gap-4">
                       {asset.features.map((feature, index) => (
                         <div key={index} className="flex items-center">
-                          <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
-                          <span className="text-slate-700">{feature}</span>
+                          <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                          <span className="text-foreground">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -259,37 +261,37 @@ export default function AssetReviewPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Revenue Metrics</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Revenue Metrics</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Annual Revenue</span>
+                            <span className="text-muted-foreground">Annual Revenue</span>
                             <span className="font-medium">${asset.financials.annualRevenue.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Monthly Revenue</span>
+                            <span className="text-muted-foreground">Monthly Revenue</span>
                             <span className="font-medium">${asset.financials.monthlyRevenue.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Occupancy Rate</span>
+                            <span className="text-muted-foreground">Occupancy Rate</span>
                             <span className="font-medium">{asset.financials.occupancyRate}%</span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Investment Metrics</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Investment Metrics</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Cap Rate</span>
+                            <span className="text-muted-foreground">Cap Rate</span>
                             <span className="font-medium">{asset.financials.capRate}%</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">NOI</span>
-                            <span className="font-medium text-green-600">
+                            <span className="text-muted-foreground">NOI</span>
+                            <span className="font-medium text-primary">
                               ${asset.financials.netOperatingIncome.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Projected Appreciation</span>
+                            <span className="text-muted-foreground">Projected Appreciation</span>
                             <span className="font-medium">{asset.financials.projectedAppreciation}%</span>
                           </div>
                         </div>
@@ -310,11 +312,11 @@ export default function AssetReviewPage() {
                         <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center">
                             <div
-                              className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-green-500" : "bg-yellow-500"}`}
+                              className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-primary" : "bg-yellow-500"}`}
                             ></div>
                             <div>
                               <span className="font-medium">{doc.name}</span>
-                              <div className="flex items-center space-x-2 text-sm text-slate-600">
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                                 <Badge variant="outline">{doc.type}</Badge>
                                 <span>{doc.size}</span>
                                 <span>•</span>
@@ -328,7 +330,7 @@ export default function AssetReviewPage() {
                               Download
                             </Button>
                             {!doc.verified && (
-                              <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                              <Button size="sm" className="bg-primary hover:bg-primary/90">
                                 <Check className="h-4 w-4 mr-2" />
                                 Verify
                               </Button>
@@ -349,36 +351,36 @@ export default function AssetReviewPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Company Details</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Company Details</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Company Name</span>
+                            <span className="text-muted-foreground">Company Name</span>
                             <span className="font-medium">{asset.ownerInfo.companyName}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Contact Person</span>
+                            <span className="text-muted-foreground">Contact Person</span>
                             <span className="font-medium">{asset.ownerInfo.contactPerson}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Years in Business</span>
+                            <span className="text-muted-foreground">Years in Business</span>
                             <span className="font-medium">{asset.ownerInfo.yearsInBusiness}</span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Track Record</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Track Record</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Previous Properties</span>
+                            <span className="text-muted-foreground">Previous Properties</span>
                             <span className="font-medium">{asset.ownerInfo.previousProperties}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Credit Rating</span>
-                            <span className="font-medium text-green-600">{asset.ownerInfo.creditRating}</span>
+                            <span className="text-muted-foreground">Credit Rating</span>
+                            <span className="font-medium text-primary">{asset.ownerInfo.creditRating}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">KYC Status</span>
-                            <Badge className="bg-green-100 text-green-800">{asset.ownerInfo.kycStatus}</Badge>
+                            <span className="text-muted-foreground">KYC Status</span>
+                            <Badge className="bg-primary text-primary-foreground">{asset.ownerInfo.kycStatus}</Badge>
                           </div>
                         </div>
                       </div>
@@ -396,11 +398,11 @@ export default function AssetReviewPage() {
                     <div className="space-y-4">
                       {Object.entries(asset.riskAssessment).map(([key, value]) => (
                         <div key={key} className="flex justify-between items-center">
-                          <span className="text-slate-700 capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
+                          <span className="text-foreground capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
                           <Badge
                             className={`${
                               value === "Low"
-                                ? "bg-green-100 text-green-800"
+                                ? "bg-primary text-primary-foreground"
                                 : value === "Medium" || value === "Medium-Low"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-red-100 text-red-800"
@@ -424,12 +426,12 @@ export default function AssetReviewPage() {
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl">Review Actions</CardTitle>
-                  <p className="text-slate-600">Make a decision on this property submission</p>
+                  <p className="text-muted-foreground">Make a decision on this property submission</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
                     <DialogTrigger asChild>
-                      <Button className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
                         <Check className="h-5 w-5 mr-2" />
                         Approve Property
                       </Button>
@@ -450,7 +452,7 @@ export default function AssetReviewPage() {
                         <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
                           Cancel
                         </Button>
-                        <Button className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>
+                        <Button className="bg-primary hover:bg-primary/90" onClick={handleApprove}>
                           Approve Property
                         </Button>
                       </DialogFooter>
@@ -492,7 +494,7 @@ export default function AssetReviewPage() {
                     <Button variant="outline" className="w-full bg-transparent" onClick={handleFractionalize}>
                       Start Fractionalization
                     </Button>
-                    <p className="text-xs text-slate-500 mt-2 text-center">Only available after approval</p>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">Only available after approval</p>
                   </div>
                 </CardContent>
               </Card>
@@ -504,22 +506,22 @@ export default function AssetReviewPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Documents Verified</span>
+                    <span className="text-muted-foreground">Documents Verified</span>
                     <span className="font-medium">
                       {asset.documents.filter((d) => d.verified).length}/{asset.documents.length}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Risk Level</span>
+                    <span className="text-muted-foreground">Risk Level</span>
                     <Badge className="bg-yellow-100 text-yellow-800">{asset.riskAssessment.overallRisk}</Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Owner KYC</span>
-                    <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                    <span className="text-muted-foreground">Owner KYC</span>
+                    <Badge className="bg-primary text-primary-foreground">Verified</Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Expected ROI</span>
-                    <span className="font-medium text-green-600">{asset.expectedYield}%</span>
+                    <span className="text-muted-foreground">Expected ROI</span>
+                    <span className="font-medium text-primary">{asset.expectedYield}%</span>
                   </div>
                 </CardContent>
               </Card>

@@ -80,11 +80,11 @@ export default function PropertyDetailsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-600 hover:text-blue-900">
+              <Link href="/" className="flex items-center text-muted-foreground hover:text-primary">
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Properties
               </Link>
@@ -120,7 +120,9 @@ export default function PropertyDetailsPage() {
                   alt={property.title}
                   className="w-full h-96 object-cover rounded-lg"
                 />
-                <Badge className="absolute top-4 right-4 bg-green-600">{property.expectedYield}% APY</Badge>
+                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
+                  {property.expectedYield}% APY
+                </Badge>
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {property.images.map((image, index) => (
@@ -128,7 +130,7 @@ export default function PropertyDetailsPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`relative rounded-lg overflow-hidden ${
-                      selectedImage === index ? "ring-2 ring-blue-900" : ""
+                      selectedImage === index ? "ring-2 ring-primary" : ""
                     }`}
                   >
                     <img
@@ -145,28 +147,28 @@ export default function PropertyDetailsPage() {
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">{property.title}</h1>
-                  <div className="flex items-center text-slate-600">
+                  <h1 className="text-3xl font-bold text-foreground mb-2">{property.title}</h1>
+                  <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-5 w-5 mr-2" />
                     {property.location}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-slate-900">${(property.totalValue / 1000000).toFixed(1)}M</p>
-                  <p className="text-slate-600">Total Value</p>
+                  <p className="text-2xl font-bold text-foreground">${(property.totalValue / 1000000).toFixed(1)}M</p>
+                  <p className="text-muted-foreground">Total Value</p>
                 </div>
               </div>
 
-              <p className="text-slate-700 text-lg leading-relaxed mb-6">{property.description}</p>
+              <p className="text-foreground text-lg leading-relaxed mb-6">{property.description}</p>
 
               {/* Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-600">Funding Progress</span>
+                  <span className="text-muted-foreground">Funding Progress</span>
                   <span className="font-medium">{property.progress}%</span>
                 </div>
                 <Progress value={property.progress} className="h-3" />
-                <div className="flex justify-between text-sm mt-2 text-slate-600">
+                <div className="flex justify-between text-sm mt-2 text-muted-foreground">
                   <span>{property.tokensSold.toLocaleString()} tokens sold</span>
                   <span>{(property.totalTokens - property.tokensSold).toLocaleString()} remaining</span>
                 </div>
@@ -174,25 +176,25 @@ export default function PropertyDetailsPage() {
 
               {/* Key Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{property.expectedYield}%</p>
-                  <p className="text-sm text-slate-600">Expected APY</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">{property.expectedYield}%</p>
+                  <p className="text-sm text-muted-foreground">Expected APY</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <Users className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">{property.tokensSold}</p>
-                  <p className="text-sm text-slate-600">Investors</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <Users className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">{property.tokensSold}</p>
+                  <p className="text-sm text-muted-foreground">Investors</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <Calendar className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">5 years</p>
-                  <p className="text-sm text-slate-600">Hold Period</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <Calendar className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">5 years</p>
+                  <p className="text-sm text-muted-foreground">Hold Period</p>
                 </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <Shield className="h-6 w-6 text-amber-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-slate-900">A+</p>
-                  <p className="text-sm text-slate-600">Credit Rating</p>
+                <div className="text-center p-4 bg-card rounded-lg border">
+                  <Shield className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">A+</p>
+                  <p className="text-sm text-muted-foreground">Credit Rating</p>
                 </div>
               </div>
             </div>
@@ -215,8 +217,8 @@ export default function PropertyDetailsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       {property.features.map((feature, index) => (
                         <div key={index} className="flex items-center">
-                          <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
-                          <span className="text-slate-700">{feature}</span>
+                          <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                          <span className="text-foreground">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -232,30 +234,30 @@ export default function PropertyDetailsPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Revenue</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Revenue</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Annual Rent</span>
+                            <span className="text-muted-foreground">Annual Rent</span>
                             <span className="font-medium">${property.financials.annualRent.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Monthly Rent</span>
+                            <span className="text-muted-foreground">Monthly Rent</span>
                             <span className="font-medium">${property.financials.monthlyRent.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-slate-900 mb-3">Expenses</h4>
+                        <h4 className="font-semibold text-foreground mb-3">Expenses</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Operating Expenses</span>
+                            <span className="text-muted-foreground">Operating Expenses</span>
                             <span className="font-medium">
                               ${property.financials.operatingExpenses.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600">Net Operating Income</span>
-                            <span className="font-medium text-green-600">
+                            <span className="text-muted-foreground">Net Operating Income</span>
+                            <span className="font-medium text-primary">
                               ${property.financials.netOperatingIncome.toLocaleString()}
                             </span>
                           </div>
@@ -277,7 +279,7 @@ export default function PropertyDetailsPage() {
                         <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center">
                             <div
-                              className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-green-500" : "bg-yellow-500"}`}
+                              className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-primary" : "bg-yellow-500"}`}
                             ></div>
                             <span className="font-medium">{doc.name}</span>
                             <Badge variant="outline" className="ml-2">
@@ -302,17 +304,17 @@ export default function PropertyDetailsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="border-l-4 border-blue-900 pl-4">
-                        <p className="font-medium text-slate-900">Property Inspection Completed</p>
-                        <p className="text-sm text-slate-600">December 15, 2024</p>
-                        <p className="text-slate-700 mt-2">
+                      <div className="border-l-4 border-primary pl-4">
+                        <p className="font-medium text-foreground">Property Inspection Completed</p>
+                        <p className="text-sm text-muted-foreground">December 15, 2024</p>
+                        <p className="text-foreground mt-2">
                           Professional inspection completed with excellent results. All systems operational.
                         </p>
                       </div>
-                      <div className="border-l-4 border-green-600 pl-4">
-                        <p className="font-medium text-slate-900">75% Funding Milestone Reached</p>
-                        <p className="text-sm text-slate-600">December 10, 2024</p>
-                        <p className="text-slate-700 mt-2">
+                      <div className="border-l-4 border-primary pl-4">
+                        <p className="font-medium text-foreground">75% Funding Milestone Reached</p>
+                        <p className="text-sm text-muted-foreground">December 10, 2024</p>
+                        <p className="text-foreground mt-2">
                           We've successfully reached 75% of our funding goal. Thank you to all investors!
                         </p>
                       </div>
@@ -329,11 +331,11 @@ export default function PropertyDetailsPage() {
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl">Invest in This Property</CardTitle>
-                  <p className="text-slate-600">Minimum investment: ${property.minInvestment}</p>
+                  <p className="text-muted-foreground">Minimum investment: ${property.minInvestment}</p>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Investment Amount ($)</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Investment Amount ($)</label>
                     <Input
                       type="number"
                       placeholder="1000"
@@ -344,18 +346,18 @@ export default function PropertyDetailsPage() {
                   </div>
 
                   {investmentAmount && (
-                    <div className="bg-slate-50 p-4 rounded-lg space-y-2">
+                    <div className="bg-muted p-4 rounded-lg space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Tokens to receive:</span>
+                        <span className="text-muted-foreground">Tokens to receive:</span>
                         <span className="font-medium">{tokensFromInvestment}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Ownership percentage:</span>
+                        <span className="text-muted-foreground">Ownership percentage:</span>
                         <span className="font-medium">{ownershipPercentage}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Est. annual return:</span>
-                        <span className="font-medium text-green-600">
+                        <span className="text-muted-foreground">Est. annual return:</span>
+                        <span className="font-medium text-primary">
                           ${Math.round((Number(investmentAmount) * property.expectedYield) / 100)}
                         </span>
                       </div>
@@ -363,7 +365,7 @@ export default function PropertyDetailsPage() {
                   )}
 
                   <Button
-                    className="w-full bg-blue-900 hover:bg-blue-800 text-lg py-6"
+                    className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
                     disabled={!investmentAmount || Number(investmentAmount) < property.minInvestment}
                   >
                     Buy Tokens
@@ -375,7 +377,7 @@ export default function PropertyDetailsPage() {
                     </Button>
                   </div>
 
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-xs text-muted-foreground space-y-1">
                     <p>• Investments are subject to market risks</p>
                     <p>• Minimum holding period: 12 months</p>
                     <p>• Returns are not guaranteed</p>

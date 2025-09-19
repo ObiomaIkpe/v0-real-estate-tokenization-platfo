@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { TrendingUp, DollarSign, Building, Calendar, ArrowUpRight } from "lucide-react"
+import { TrendingUp, DollarSign, Calendar, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import Image from "next/image"
 
 // Mock portfolio data
 const portfolioData = {
@@ -112,22 +113,22 @@ export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-2">
-                <Building className="h-8 w-8 text-blue-900" />
-                <span className="text-xl font-bold text-slate-900">PropToken</span>
+                <Image src="/favicon.ico" alt="REALiFi Logo" width={32} height={32} className="h-8 w-8" />
+                <span className="text-xl font-bold text-foreground">REALiFi</span>
               </Link>
               <nav className="hidden md:flex space-x-6">
-                <Link href="/" className="text-slate-600 hover:text-blue-900 transition-colors">
+                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
                   Home
                 </Link>
-                <Link href="/portfolio" className="text-blue-900 font-medium">
+                <Link href="/portfolio" className="text-primary font-medium">
                   My Portfolio
                 </Link>
-                <Link href="/admin" className="text-slate-600 hover:text-blue-900 transition-colors">
+                <Link href="/admin" className="text-muted-foreground hover:text-primary transition-colors">
                   Admin Dashboard
                 </Link>
               </nav>
@@ -136,7 +137,7 @@ export default function PortfolioPage() {
               <Button variant="outline" size="sm">
                 Export Report
               </Button>
-              <Button size="sm" className="bg-blue-900 hover:bg-blue-800">
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Add Funds
               </Button>
             </div>
@@ -147,20 +148,20 @@ export default function PortfolioPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">My Portfolio</h1>
-          <p className="text-slate-600">Track your real estate investments and returns</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">My Portfolio</h1>
+          <p className="text-muted-foreground">Track your real estate investments and returns</p>
         </div>
 
         {/* Portfolio Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Portfolio Value</CardTitle>
-              <DollarSign className="h-4 w-4 text-slate-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Portfolio Value</CardTitle>
+              <DollarSign className="h-4 w-4 text-[#2d3748]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-900">${portfolioData.totalValue.toLocaleString()}</div>
-              <div className="flex items-center text-sm text-green-600 mt-1">
+              <div className="text-2xl font-bold text-foreground">${portfolioData.totalValue.toLocaleString()}</div>
+              <div className="flex items-center text-sm text-primary mt-1">
                 <TrendingUp className="h-4 w-4 mr-1" />+{portfolioData.returnPercentage}% all time
               </div>
             </CardContent>
@@ -168,34 +169,34 @@ export default function PortfolioPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Invested</CardTitle>
-              <ArrowUpRight className="h-4 w-4 text-slate-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Invested</CardTitle>
+              <ArrowUpRight className="h-4 w-4 text-[#2d3748]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-900">${portfolioData.totalInvested.toLocaleString()}</div>
-              <p className="text-xs text-slate-600 mt-1">Across {portfolioData.properties.length} properties</p>
+              <div className="text-2xl font-bold text-foreground">${portfolioData.totalInvested.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Across {portfolioData.properties.length} properties</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Returns</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Returns</CardTitle>
+              <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">+${portfolioData.totalReturns.toLocaleString()}</div>
-              <p className="text-xs text-slate-600 mt-1">Unrealized gains</p>
+              <div className="text-2xl font-bold text-primary">+${portfolioData.totalReturns.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Unrealized gains</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Dividends Earned</CardTitle>
-              <Calendar className="h-4 w-4 text-slate-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Dividends Earned</CardTitle>
+              <Calendar className="h-4 w-4 text-[#2d3748]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-900">${portfolioData.totalDividends.toLocaleString()}</div>
-              <p className="text-xs text-slate-600 mt-1">Lifetime earnings</p>
+              <div className="text-2xl font-bold text-foreground">${portfolioData.totalDividends.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Lifetime earnings</p>
             </CardContent>
           </Card>
         </div>
@@ -215,8 +216,8 @@ export default function PortfolioPage() {
                 <CardTitle>Portfolio Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-slate-100 rounded-lg flex items-center justify-center">
-                  <p className="text-slate-500">Portfolio performance chart would go here</p>
+                <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Portfolio performance chart would go here</p>
                 </div>
               </CardContent>
             </Card>
@@ -233,25 +234,25 @@ export default function PortfolioPage() {
                       <div className="flex items-center space-x-3">
                         <div
                           className={`w-3 h-3 rounded-full ${
-                            transaction.type === "dividend" ? "bg-green-500" : "bg-blue-500"
+                            transaction.type === "dividend" ? "bg-primary" : "bg-[#2d3748]"
                           }`}
                         ></div>
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-foreground">
                             {transaction.type === "dividend" ? "Dividend Received" : "Investment Made"}
                           </p>
-                          <p className="text-sm text-slate-600">{transaction.property}</p>
+                          <p className="text-sm text-muted-foreground">{transaction.property}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p
                           className={`font-medium ${
-                            transaction.type === "dividend" ? "text-green-600" : "text-slate-900"
+                            transaction.type === "dividend" ? "text-primary" : "text-foreground"
                           }`}
                         >
                           {transaction.type === "dividend" ? "+" : ""}${transaction.amount}
                         </p>
-                        <p className="text-xs text-slate-500">{transaction.date}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.date}</p>
                       </div>
                     </div>
                   ))}
@@ -272,7 +273,7 @@ export default function PortfolioPage() {
                     />
                     <Badge
                       className={`absolute top-3 right-3 ${
-                        property.status === "active" ? "bg-green-600" : "bg-yellow-600"
+                        property.status === "active" ? "bg-primary text-primary-foreground" : "bg-[#2d3748] text-white"
                       }`}
                     >
                       {property.status}
@@ -285,26 +286,26 @@ export default function PortfolioPage() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-slate-600">Invested</p>
-                        <p className="font-semibold text-slate-900">${property.invested.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Invested</p>
+                        <p className="font-semibold text-foreground">${property.invested.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">Current Value</p>
-                        <p className="font-semibold text-slate-900">${property.currentValue.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Current Value</p>
+                        <p className="font-semibold text-foreground">${property.currentValue.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">Tokens Owned</p>
-                        <p className="font-semibold text-slate-900">{property.tokens}</p>
+                        <p className="text-sm text-muted-foreground">Tokens Owned</p>
+                        <p className="font-semibold text-foreground">{property.tokens}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">Total Dividends</p>
-                        <p className="font-semibold text-green-600">${property.dividendsEarned}</p>
+                        <p className="text-sm text-muted-foreground">Total Dividends</p>
+                        <p className="font-semibold text-primary">${property.dividendsEarned}</p>
                       </div>
                     </div>
 
                     <div>
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-slate-600">Ownership</span>
+                        <span className="text-muted-foreground">Ownership</span>
                         <span className="font-medium">
                           {((property.tokens / property.totalTokens) * 100).toFixed(3)}%
                         </span>
@@ -314,8 +315,8 @@ export default function PortfolioPage() {
 
                     <div className="flex justify-between items-center pt-2">
                       <div>
-                        <p className="text-sm text-slate-600">APY</p>
-                        <p className="font-semibold text-slate-900">{property.apy}%</p>
+                        <p className="text-sm text-muted-foreground">APY</p>
+                        <p className="font-semibold text-foreground">{property.apy}%</p>
                       </div>
                       <Link href={`/property/${property.id}`}>
                         <Button variant="outline" size="sm">
@@ -341,27 +342,27 @@ export default function PortfolioPage() {
                       <div className="flex items-center space-x-4">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            transaction.type === "dividend" ? "bg-green-100" : "bg-blue-100"
+                            transaction.type === "dividend" ? "bg-primary/10" : "bg-[#2d3748]/10"
                           }`}
                         >
                           {transaction.type === "dividend" ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <TrendingUp className="h-5 w-5 text-primary" />
                           ) : (
-                            <ArrowUpRight className="h-5 w-5 text-blue-600" />
+                            <ArrowUpRight className="h-5 w-5 text-[#2d3748]" />
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-foreground">
                             {transaction.type === "dividend" ? "Dividend Payment" : "Token Purchase"}
                           </p>
-                          <p className="text-sm text-slate-600">{transaction.property}</p>
-                          <p className="text-xs text-slate-500">{transaction.date}</p>
+                          <p className="text-sm text-muted-foreground">{transaction.property}</p>
+                          <p className="text-xs text-muted-foreground">{transaction.date}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p
                           className={`text-lg font-semibold ${
-                            transaction.type === "dividend" ? "text-green-600" : "text-slate-900"
+                            transaction.type === "dividend" ? "text-primary" : "text-foreground"
                           }`}
                         >
                           {transaction.type === "dividend" ? "+" : ""}${transaction.amount}

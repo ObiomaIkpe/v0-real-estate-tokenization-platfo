@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { ArrowLeft, Upload, X, Plus, DollarSign, Building, FileText, AlertCircle } from "lucide-react"
+import { ArrowLeft, Upload, X, Plus, DollarSign, FileText, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -78,13 +78,28 @@ export default function SubmitAssetPage() {
     const files = event.target.files
     if (!files) return
 
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+    ]
+
     Array.from(files).forEach((file) => {
-      if (file.type.startsWith("image/")) {
+      if (allowedTypes.includes(file.type)) {
         const id = Math.random().toString(36).substr(2, 9)
         const preview = URL.createObjectURL(file)
         setImages((prev) => [...prev, { id, file, preview }])
+      } else {
+        // Show error for invalid file types
+        alert(`File "${file.name}" is not supported. Please upload only JPEG, PNG, WebP, SVG, or ICO files.`)
       }
     })
+
+    event.target.value = ""
   }
 
   const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,20 +186,20 @@ export default function SubmitAssetPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-600 hover:text-blue-900">
+              <Link href="/" className="flex items-center text-gray-600 hover:text-[#2d3748]">
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Home
               </Link>
             </div>
             <div className="flex items-center space-x-2">
-              <Building className="h-6 w-6 text-blue-900" />
-              <span className="text-lg font-bold text-slate-900">Submit Property</span>
+              <img src="/favicon.ico" alt="REALiFi" className="h-6 w-6" />
+              <span className="text-lg font-bold text-[#2d3748]">Submit Property</span>
             </div>
           </div>
         </div>
@@ -199,23 +214,23 @@ export default function SubmitAssetPage() {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
                     currentStep === step.number
-                      ? "bg-blue-900 text-white"
+                      ? "bg-[#2d3748] text-white"
                       : currentStep > step.number
-                        ? "bg-green-600 text-white"
-                        : "bg-slate-200 text-slate-600"
+                        ? "bg-[#d69e2e] text-white"
+                        : "bg-gray-200 text-gray-600"
                   }`}
                 >
                   {step.number}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-16 h-1 mx-2 ${currentStep > step.number ? "bg-green-600" : "bg-slate-200"}`} />
+                  <div className={`w-16 h-1 mx-2 ${currentStep > step.number ? "bg-[#d69e2e]" : "bg-gray-200"}`} />
                 )}
               </div>
             ))}
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-slate-900">{steps[currentStep - 1].title}</h2>
-            <p className="text-slate-600">{steps[currentStep - 1].description}</p>
+            <h2 className="text-2xl font-bold text-[#2d3748]">{steps[currentStep - 1].title}</h2>
+            <p className="text-gray-600">{steps[currentStep - 1].description}</p>
           </div>
         </div>
 
@@ -406,24 +421,24 @@ export default function SubmitAssetPage() {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-slate-900 mb-2">Calculated Metrics</h4>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-[#2d3748] mb-2">Calculated Metrics</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <p className="text-slate-600">Annual Revenue</p>
+                      <p className="text-gray-600">Annual Revenue</p>
                       <p className="font-medium">
                         ${formData.monthlyRevenue ? (Number(formData.monthlyRevenue) * 12).toLocaleString() : "0"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-600">Annual Expenses</p>
+                      <p className="text-gray-600">Annual Expenses</p>
                       <p className="font-medium">
                         ${formData.operatingExpenses ? (Number(formData.operatingExpenses) * 12).toLocaleString() : "0"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-600">Net Operating Income</p>
-                      <p className="font-medium text-green-600">
+                      <p className="text-gray-600">Net Operating Income</p>
+                      <p className="font-medium text-[#d69e2e]">
                         $
                         {formData.monthlyRevenue && formData.operatingExpenses
                           ? (
@@ -434,7 +449,7 @@ export default function SubmitAssetPage() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-600">Cap Rate</p>
+                      <p className="text-gray-600">Cap Rate</p>
                       <p className="font-medium">
                         {formData.monthlyRevenue && formData.operatingExpenses && formData.requestedValue
                           ? (
@@ -454,32 +469,37 @@ export default function SubmitAssetPage() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-8">
-                    <Upload className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-slate-900 mb-2">Upload Property Images</h3>
-                    <p className="text-slate-600 mb-4">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+                    <Upload className="h-12 w-12 text-[#2d3748] mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">Upload Property Images</h3>
+                    <p className="text-gray-600 mb-4">
                       Add high-quality photos of your property (exterior, interior, amenities)
                     </p>
                     <input
                       type="file"
                       multiple
-                      accept="image/*"
+                      accept=".jpeg,.jpg,.png,.webp,.svg,.ico"
                       onChange={handleImageUpload}
                       className="hidden"
                       id="image-upload"
                     />
                     <label htmlFor="image-upload">
-                      <Button variant="outline" className="cursor-pointer bg-transparent">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Choose Images
                       </Button>
                     </label>
+                    <p className="text-xs text-gray-500 mt-2">Supported formats: JPEG, PNG, WebP, SVG, ICO</p>
                   </div>
                 </div>
 
                 {images.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-slate-900 mb-4">Uploaded Images ({images.length})</h4>
+                    <h4 className="font-semibold text-[#2d3748] mb-4">Uploaded Images ({images.length})</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {images.map((image) => (
                         <div key={image.id} className="relative group">
@@ -505,15 +525,15 @@ export default function SubmitAssetPage() {
             {/* Step 4: Documents */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-[#2d3748] bg-opacity-5 p-4 rounded-lg">
                   <div className="flex items-start">
-                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3" />
+                    <AlertCircle className="h-5 w-5 text-[#2d3748] mt-0.5 mr-3" />
                     <div>
-                      <h4 className="font-semibold text-blue-900">Required Documents</h4>
-                      <p className="text-blue-800 text-sm mt-1">
+                      <h4 className="font-semibold text-[#2d3748]">Required Documents</h4>
+                      <p className="text-[#2d3748] text-sm mt-1">
                         Please upload the following documents to complete your submission:
                       </p>
-                      <ul className="text-blue-800 text-sm mt-2 space-y-1">
+                      <ul className="text-[#2d3748] text-sm mt-2 space-y-1">
                         <li>• Property deed or title</li>
                         <li>• Financial statements (last 3 years)</li>
                         <li>• Property inspection report</li>
@@ -526,10 +546,10 @@ export default function SubmitAssetPage() {
                 </div>
 
                 <div className="text-center">
-                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-8">
-                    <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-slate-900 mb-2">Upload Documents</h3>
-                    <p className="text-slate-600 mb-4">Upload PDF files and other relevant documents</p>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">Upload Documents</h3>
+                    <p className="text-gray-600 mb-4">Upload PDF files and other relevant documents</p>
                     <input
                       type="file"
                       multiple
@@ -539,7 +559,10 @@ export default function SubmitAssetPage() {
                       id="document-upload"
                     />
                     <label htmlFor="document-upload">
-                      <Button variant="outline" className="cursor-pointer bg-transparent">
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Choose Documents
                       </Button>
@@ -549,14 +572,14 @@ export default function SubmitAssetPage() {
 
                 {documents.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-slate-900 mb-4">Uploaded Documents ({documents.length})</h4>
+                    <h4 className="font-semibold text-[#2d3748] mb-4">Uploaded Documents ({documents.length})</h4>
                     <div className="space-y-3">
                       {documents.map((doc) => (
                         <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center">
-                            <FileText className="h-5 w-5 text-slate-400 mr-3" />
+                            <FileText className="h-5 w-5 text-gray-400 mr-3" />
                             <div>
-                              <p className="font-medium text-slate-900">{doc.name}</p>
+                              <p className="font-medium text-[#2d3748]">{doc.name}</p>
                               <Badge variant="outline">{doc.type}</Badge>
                             </div>
                           </div>
@@ -668,41 +691,41 @@ export default function SubmitAssetPage() {
             {/* Step 6: Review & Submit */}
             {currentStep === 6 && (
               <div className="space-y-6">
-                <div className="bg-slate-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Submission Summary</h3>
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-[#2d3748] mb-4">Submission Summary</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-medium text-slate-900 mb-2">Property Details</h4>
+                      <h4 className="font-medium text-[#2d3748] mb-2">Property Details</h4>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="text-slate-600">Title:</span> {formData.propertyTitle}
+                          <span className="text-gray-600">Title:</span> {formData.propertyTitle}
                         </p>
                         <p>
-                          <span className="text-slate-600">Type:</span> {formData.propertyType}
+                          <span className="text-gray-600">Type:</span> {formData.propertyType}
                         </p>
                         <p>
-                          <span className="text-slate-600">Location:</span> {formData.location}
+                          <span className="text-gray-600">Location:</span> {formData.location}
                         </p>
                         <p>
-                          <span className="text-slate-600">Requested Value:</span> $
+                          <span className="text-gray-600">Requested Value:</span> $
                           {Number(formData.requestedValue).toLocaleString()}
                         </p>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-slate-900 mb-2">Attachments</h4>
+                      <h4 className="font-medium text-[#2d3748] mb-2">Attachments</h4>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="text-slate-600">Images:</span> {images.length} uploaded
+                          <span className="text-gray-600">Images:</span> {images.length} uploaded
                         </p>
                         <p>
-                          <span className="text-slate-600">Documents:</span> {documents.length} uploaded
+                          <span className="text-gray-600">Documents:</span> {documents.length} uploaded
                         </p>
                         <p>
-                          <span className="text-slate-600">Owner:</span> {formData.ownerName}
+                          <span className="text-gray-600">Owner:</span> {formData.ownerName}
                         </p>
                         <p>
-                          <span className="text-slate-600">Contact:</span> {formData.email}
+                          <span className="text-gray-600">Contact:</span> {formData.email}
                         </p>
                       </div>
                     </div>
@@ -710,7 +733,7 @@ export default function SubmitAssetPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-900">Legal & Compliance Checklist</h4>
+                  <h4 className="font-semibold text-[#2d3748]">Legal & Compliance Checklist</h4>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -751,12 +774,12 @@ export default function SubmitAssetPage() {
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 p-4 rounded-lg">
+                <div className="bg-[#d69e2e] bg-opacity-10 p-4 rounded-lg">
                   <div className="flex items-start">
-                    <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3" />
+                    <AlertCircle className="h-5 w-5 text-[#d69e2e] mt-0.5 mr-3" />
                     <div>
-                      <h4 className="font-semibold text-yellow-900">Review Process</h4>
-                      <p className="text-yellow-800 text-sm mt-1">
+                      <h4 className="font-semibold text-[#2d3748]">Review Process</h4>
+                      <p className="text-[#2d3748] text-sm mt-1">
                         Your submission will be reviewed by our team within 5-7 business days. You will receive email
                         updates on the status of your application.
                       </p>
@@ -780,7 +803,7 @@ export default function SubmitAssetPage() {
                 <Button
                   onClick={() => setCurrentStep((prev) => prev + 1)}
                   disabled={!isStepValid(currentStep)}
-                  className="bg-blue-900 hover:bg-blue-800"
+                  className="bg-[#2d3748] hover:bg-[#2d3748]/90 text-white"
                 >
                   Next Step
                 </Button>
@@ -788,7 +811,7 @@ export default function SubmitAssetPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={!isStepValid(currentStep) || isSubmitting}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-[#d69e2e] hover:bg-[#d69e2e]/90 text-white"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Property"}
                 </Button>
