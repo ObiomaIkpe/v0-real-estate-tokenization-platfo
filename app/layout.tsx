@@ -1,33 +1,26 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
-import { Suspense } from "react"
-import "./globals.css"
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import NavBar from "@/components/layout/NavBar";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "REALiFi - Real Estate Tokenization Platform",
-  description: "Invest in tokenized real estate properties with blockchain technology",
-  generator: "v0.app",
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
-}
+  title: "REALiFi",
+  description: "Real Estate Tokenization Platform",
+};
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-        <Analytics />
+      <body className={inter.className}>
+        <NavBar />
+        {children}
       </body>
     </html>
-  )
+  );
 }

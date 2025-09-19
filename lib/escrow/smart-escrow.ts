@@ -1,263 +1,88 @@
-import { hederaConsensusService } from "../hedera/hcs"
-import type { DividendDistribution } from "../types/hedera"
+export type EscrowAccount = {
+  id: string;
+  propertyId: string;
+  balance: number;
+  currency: string;
+  lastDistribution: Date;
+  totalDistributed: number;
+  managementFeeRate: number;
+  platformFeeRate: number;
+};
 
-export interface EscrowAccount {
-  id: string
-  propertyId: string
-  balance: number
-  currency: "USDC" | "HBAR"
-  lastDistribution: Date
-  totalDistributed: number
-  managementFeeRate: number // Percentage
-  platformFeeRate: number // Percentage
-}
+export type EscrowTransaction = {
+  id: string;
+  escrowId: string;
+  type: "deposit" | "fee_distribution" | "dividend_distribution";
+  amount: number;
+  currency: string;
+  recipient?: string;
+  description: string;
+  timestamp: Date;
+};
 
-export interface EscrowTransaction {
-  id: string
-  escrowId: string
-  type: "deposit" | "withdrawal" | "fee_distribution" | "dividend_distribution"
-  amount: number
-  currency: "USDC" | "HBAR"
-  recipient?: string
-  description: string
-  timestamp: Date
-  transactionHash?: string
-}
-
-export class SmartEscrowService {
-  // Create escrow account for a property
-  async createEscrowAccount(
-    propertyId: string,
-    managementFeeRate = 2.0,
-    platformFeeRate = 0.5,
-  ): Promise<EscrowAccount> {
-    try {
-      const escrowAccount: EscrowAccount = {
-        id: `escrow_${propertyId}_${Date.now()}`,
-        propertyId,
-        balance: 0,
-        currency: "USDC",
-        lastDistribution: new Date(),
-        totalDistributed: 0,
-        managementFeeRate,
-        platformFeeRate,
-      }
-
-      return escrowAccount
-    } catch (error) {
-      console.error("Error creating escrow account:", error)
-      throw new Error("Failed to create escrow account")
-    }
-  }
-
-  // Deposit rental income into escrow
-  async depositRentalIncome(escrowAccount: EscrowAccount, amount: number, topicId: string): Promise<EscrowTransaction> {
-    try {
-      const transaction: EscrowTransaction = {
-        id: `tx_${Date.now()}`,
-        escrowId: escrowAccount.id,
-        type: "deposit",
-        amount,
-        currency: "USDC",
-        description: `Rental income deposit for property ${escrowAccount.propertyId}`,
-        timestamp: new Date(),
-      }
-
-      // Update escrow balance
-      escrowAccount.balance += amount
-
-      // Log to HCS
-      await hederaConsensusService.submitAuditLog(topicId, {
-        propertyId: escrowAccount.propertyId,
-        action: "RENTAL_INCOME_DEPOSITED",
-        details: {
-          escrowId: escrowAccount.id,
-          amount,
-          newBalance: escrowAccount.balance,
-          transactionId: transaction.id,
-        },
-        timestamp: Date.now(),
-      })
-
-      return transaction
-    } catch (error) {
-      console.error("Error depositing rental income:", error)
-      throw new Error("Failed to deposit rental income")
-    }
-  }
-
-  // Calculate and distribute fees automatically
+class SmartEscrowService {
   async distributeFees(
-    escrowAccount: EscrowAccount,
+    escrow: EscrowAccount,
     topicId: string,
-    managementCompanyAccount: string,
-    platformAccount: string,
-  ): Promise<EscrowTransaction[]> {
-    try {
-      const transactions: EscrowTransaction[] = []
-      const availableBalance = escrowAccount.balance
+    managementId: string,
+    platformId: string
+  ) {
+    const res = await fetch("/api/escrow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        escrowId: escrow.id,
+        amount:
+          (escrow.balance *
+            (escrow.managementFeeRate + escrow.platformFeeRate)) /
+          100,
+        topicId,
+        managementId,
+        platformId,
+      }),
+    });
 
-      // Calculate fees
-      const managementFee = (availableBalance * escrowAccount.managementFeeRate) / 100
-      const platformFee = (availableBalance * escrowAccount.platformFeeRate) / 100
+    if (!res.ok) throw new Error("Failed to distribute fees");
 
-      // Management fee distribution
-      if (managementFee > 0) {
-        const mgmtTransaction: EscrowTransaction = {
-          id: `tx_mgmt_${Date.now()}`,
-          escrowId: escrowAccount.id,
-          type: "fee_distribution",
-          amount: managementFee,
-          currency: "USDC",
-          recipient: managementCompanyAccount,
-          description: `Management fee (${escrowAccount.managementFeeRate}%)`,
-          timestamp: new Date(),
-        }
-        transactions.push(mgmtTransaction)
-        escrowAccount.balance -= managementFee
-      }
+    const data = await res.json();
 
-      // Platform fee distribution
-      if (platformFee > 0) {
-        const platformTransaction: EscrowTransaction = {
-          id: `tx_platform_${Date.now()}`,
-          escrowId: escrowAccount.id,
-          type: "fee_distribution",
-          amount: platformFee,
-          currency: "USDC",
-          recipient: platformAccount,
-          description: `Platform fee (${escrowAccount.platformFeeRate}%)`,
-          timestamp: new Date(),
-        }
-        transactions.push(platformTransaction)
-        escrowAccount.balance -= platformFee
-      }
-
-      // Log fee distributions to HCS
-      await hederaConsensusService.submitAuditLog(topicId, {
-        propertyId: escrowAccount.propertyId,
-        action: "FEES_DISTRIBUTED",
-        details: {
-          escrowId: escrowAccount.id,
-          managementFee,
-          platformFee,
-          remainingBalance: escrowAccount.balance,
-          transactions: transactions.map((tx) => ({
-            id: tx.id,
-            type: tx.type,
-            amount: tx.amount,
-            recipient: tx.recipient,
-          })),
-        },
-        timestamp: Date.now(),
-      })
-
-      return transactions
-    } catch (error) {
-      console.error("Error distributing fees:", error)
-      throw new Error("Failed to distribute fees")
-    }
-  }
-
-  // Distribute dividends to token holders
-  async distributeDividends(
-    escrowAccount: EscrowAccount,
-    tokenHolders: { accountId: string; tokenAmount: number }[],
-    totalTokenSupply: number,
-    topicId: string,
-  ): Promise<DividendDistribution> {
-    try {
-      const availableForDividends = escrowAccount.balance
-      const distributionDate = new Date()
-
-      const recipients = tokenHolders.map((holder) => {
-        const ownershipPercentage = holder.tokenAmount / totalTokenSupply
-        const dividendAmount = availableForDividends * ownershipPercentage
-
-        return {
-          accountId: holder.accountId,
-          tokenAmount: holder.tokenAmount,
-          dividendAmount,
-        }
-      })
-
-      const distribution: DividendDistribution = {
-        id: `div_${escrowAccount.propertyId}_${Date.now()}`,
-        propertyId: escrowAccount.propertyId,
-        totalAmount: availableForDividends,
-        distributionDate,
-        recipients,
-        status: "pending",
-      }
-
-      // Update escrow account
-      escrowAccount.balance = 0 // All available balance distributed
-      escrowAccount.lastDistribution = distributionDate
-      escrowAccount.totalDistributed += availableForDividends
-
-      // Log dividend distribution to HCS
-      await hederaConsensusService.logDividendDistribution(topicId, escrowAccount.propertyId, {
-        distributionId: distribution.id,
-        totalAmount: availableForDividends,
-        recipientCount: recipients.length,
-        distributionDate: distributionDate.toISOString(),
-      })
-
-      return distribution
-    } catch (error) {
-      console.error("Error distributing dividends:", error)
-      throw new Error("Failed to distribute dividends")
-    }
-  }
-
-  // Get escrow account history
-  async getEscrowHistory(escrowId: string): Promise<EscrowTransaction[]> {
-    // In a real implementation, this would fetch from a database
-    // For now, return mock data
+    // Return a fake transaction object for UI (real one would come from server)
     return [
       {
-        id: "tx_1",
-        escrowId,
-        type: "deposit",
-        amount: 5000,
-        currency: "USDC",
-        description: "Monthly rental income",
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      },
-      {
-        id: "tx_2",
-        escrowId,
+        id: data.txId,
+        escrowId: escrow.id,
         type: "fee_distribution",
-        amount: 100,
-        currency: "USDC",
-        recipient: "0.0.management",
-        description: "Management fee (2%)",
-        timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        amount: escrow.balance * 0.025,
+        currency: escrow.currency,
+        description: "Distributed management + platform fees",
+        timestamp: new Date(),
       },
-      {
-        id: "tx_3",
-        escrowId,
-        type: "dividend_distribution",
-        amount: 4900,
-        currency: "USDC",
-        description: "Monthly dividend distribution",
-        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      },
-    ]
+    ] as EscrowTransaction[];
   }
 
-  // Calculate next distribution date
-  calculateNextDistribution(lastDistribution: Date, frequency: "monthly" | "quarterly" = "monthly"): Date {
-    const nextDate = new Date(lastDistribution)
+  async distributeDividends(
+    escrow: EscrowAccount,
+    tokenHolders: { accountId: string; tokenAmount: number }[],
+    totalDividend: number,
+    topicId: string
+  ) {
+    const res = await fetch("/api/escrow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        escrowId: escrow.id,
+        amount: totalDividend,
+        tokenHolders,
+        topicId,
+      }),
+    });
 
-    if (frequency === "monthly") {
-      nextDate.setMonth(nextDate.getMonth() + 1)
-    } else {
-      nextDate.setMonth(nextDate.getMonth() + 3)
-    }
+    if (!res.ok) throw new Error("Failed to distribute dividends");
 
-    return nextDate
+    const data = await res.json();
+
+    return data;
   }
 }
 
-export const smartEscrowService = new SmartEscrowService()
+export const smartEscrowService = new SmartEscrowService();
