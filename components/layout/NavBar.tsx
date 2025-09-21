@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HashConnect } from "hashconnect";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useDisconnect, useBalance } from "wagmi";
 
 const appMetadata = {
   name: "REALiFi",
@@ -11,35 +12,55 @@ const appMetadata = {
 };
 
 export default function NavBar() {
-  const [hashConnect, setHashConnect] = useState<HashConnect | null>(null);
-  const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data: balance } = useBalance({
+    address: address,
+  });
 
-  // Init HashConnect
+  // Initialize app metadata
   useEffect(() => {
-    const init = async () => {
-      const hc = new HashConnect();
-      await hc.init(appMetadata, "testnet", false);
+    if (typeof document !== 'undefined') {
+      document.title = appMetadata.name;
+      
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', appMetadata.description);
+      } else {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        metaDescription.setAttribute('content', appMetadata.description);
+        document.getElementsByTagName('head')[0].appendChild(metaDescription);
+      }
 
-      hc.pairingEvent.on((pairingData) => {
-        const accountId = pairingData.accountIds[0];
-        setConnectedAccount(accountId);
-      });
-
-      setHashConnect(hc);
-    };
-    init();
+      let link = document.querySelector('link[rel="icon"]');
+      if (link) {
+        link.setAttribute('href', appMetadata.icon);
+      } else {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'icon');
+        link.setAttribute('href', appMetadata.icon);
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+    }
   }, []);
 
-  const connectWallet = useCallback(async () => {
-    if (!hashConnect) return;
-    await hashConnect.connectToBrowserWallet();
-  }, [hashConnect]);
+  const disconnectWallet = () => {
+    disconnect();
+    setAccountMenuOpen(false);
+  };
 
-  const disconnectWallet = useCallback(() => {
-    setConnectedAccount(null);
-    hashConnect?.disconnect();
-  }, [hashConnect]);
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const formatBalance = (balance: any) => {
+    if (!balance) return "0.00";
+    const value = parseFloat(balance.formatted);
+    return value.toFixed(4);
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -54,44 +75,151 @@ export default function NavBar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/explore" className="hover:text-blue-600">
+            <Link href="/explore" className="hover:text-blue-600 transition-colors">
               Explore
             </Link>
-            <Link href="/escrow" className="hover:text-blue-600">
+            <Link href="/escrow" className="hover:text-blue-600 transition-colors">
               Escrow
             </Link>
-            {connectedAccount && (
+            {isConnected && (
               <Link
                 href="/portfolio"
-                className="hover:text-blue-600 font-semibold"
+                className="hover:text-blue-600 font-semibold transition-colors"
               >
                 My Portfolio
               </Link>
             )}
 
-            {/* Wallet + Submit Property */}
-            {connectedAccount ? (
-              <>
-                <button
-                  onClick={disconnectWallet}
-                  className="px-3 py-1 rounded bg-gray-200 text-sm hover:bg-gray-300"
-                >
-                  Disconnect
-                </button>
+            {/* Wallet Connection */}
+            {isConnected ? (
+              <div className="flex items-center space-x-4">
+                {/* Submit Property Button */}
                 <Link
                   href="/submit-property"
-                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
                 >
                   Submit Property
                 </Link>
-              </>
+
+                {/* Account Info */}
+                <div className="relative">
+                  <button
+                    onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+                    className="flex items-center space-x-3 px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors bg-white"
+                  >
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                      {address ? address.slice(2, 4).toUpperCase() : "??"}
+                    </div>
+                    
+                    {/* Address and Balance */}
+                    <div className="text-left">
+                      <div className="text-sm font-medium text-gray-900">
+                        {address ? formatAddress(address) : ""}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {formatBalance(balance)} HBAR
+                      </div>
+                    </div>
+                    
+                    {/* Dropdown arrow */}
+                    <svg 
+                      className={`w-4 h-4 text-gray-400 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {accountMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <div className="text-sm font-medium text-gray-900">
+                          {address ? formatAddress(address) : ""}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Balance: {formatBalance(balance)} HBAR
+                        </div>
+                      </div>
+                      
+                      <Link 
+                        href="/portfolio" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setAccountMenuOpen(false)}
+                      >
+                        My Portfolio
+                      </Link>
+                      
+                      <button
+                        onClick={() => navigator.clipboard.writeText(address || "")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Copy Address
+                      </button>
+                      
+                      <hr className="my-2" />
+                      
+                      <button
+                        onClick={disconnectWallet}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Disconnect Wallet
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
-              <button
-                onClick={connectWallet}
-                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
-              >
-                Connect Wallet
-              </button>
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openAccountModal,
+                  openChainModal,
+                  openConnectModal,
+                  authenticationStatus,
+                  mounted,
+                }) => {
+                  const ready = mounted && authenticationStatus !== 'loading';
+                  const connected =
+                    ready &&
+                    account &&
+                    chain &&
+                    (!authenticationStatus ||
+                      authenticationStatus === 'authenticated');
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        'style': {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <button
+                              onClick={openConnectModal}
+                              type="button"
+                              className="px-6 py-2 rounded-lg bg-white border border-gray-300 text-black hover:bg-gray-50 transition-colors font-medium"
+                            >
+                              Connect Wallet
+                            </button>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  );
+                }}
+              </ConnectButton.Custom>
             )}
           </div>
 
@@ -99,9 +227,11 @@ export default function NavBar() {
           <div className="flex md:hidden items-center">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="text-gray-600 focus:outline-none"
+              className="text-gray-600 focus:outline-none hover:text-gray-800 transition-colors"
             >
-              ☰
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
           </div>
         </div>
@@ -109,43 +239,124 @@ export default function NavBar() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-3">
-          <Link href="/explore" className="block hover:text-blue-600">
+        <div className="md:hidden px-4 pb-4 space-y-3 border-t border-gray-100">
+          <Link href="/explore" className="block py-2 hover:text-blue-600 transition-colors">
             Explore
           </Link>
-          <Link href="/escrow" className="block hover:text-blue-600">
+          <Link href="/escrow" className="block py-2 hover:text-blue-600 transition-colors">
             Escrow
           </Link>
-          {connectedAccount && (
-            <Link href="/portfolio" className="block hover:text-blue-600">
+          {isConnected && (
+            <Link href="/portfolio" className="block py-2 hover:text-blue-600 font-semibold transition-colors">
               My Portfolio
             </Link>
           )}
 
-          {connectedAccount ? (
-            <>
-              <button
-                onClick={disconnectWallet}
-                className="w-full px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-              >
-                Disconnect
-              </button>
+          {isConnected ? (
+            <div className="space-y-3 pt-3 border-t border-gray-100">
+              {/* Account Info Mobile */}
+              <div className="flex items-center space-x-3 py-2">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-medium">
+                  {address ? address.slice(2, 4).toUpperCase() : "??"}
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {address ? formatAddress(address) : ""}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {formatBalance(balance)} HBAR
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/submit-property"
-                className="block w-full text-center px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                className="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
+                onClick={() => setMenuOpen(false)}
               >
                 Submit Property
               </Link>
-            </>
+              
+              <button
+                onClick={() => navigator.clipboard.writeText(address || "")}
+                className="block w-full text-left px-4 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Copy Address
+              </button>
+
+              <button
+                onClick={() => {
+                  disconnectWallet();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Disconnect Wallet
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={connectWallet}
-              className="w-full px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
-            >
-              Connect Wallet
-            </button>
+            <div className="pt-3 border-t border-gray-100">
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openAccountModal,
+                  openChainModal,
+                  openConnectModal,
+                  authenticationStatus,
+                  mounted,
+                }) => {
+                  const ready = mounted && authenticationStatus !== 'loading';
+                  const connected =
+                    ready &&
+                    account &&
+                    chain &&
+                    (!authenticationStatus ||
+                      authenticationStatus === 'authenticated');
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        'style': {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <button
+                              onClick={() => {
+                                openConnectModal();
+                                setMenuOpen(false);
+                              }}
+                              type="button"
+                              className="w-full px-6 py-3 rounded-lg bg-white border border-gray-300 text-black hover:bg-gray-50 transition-colors font-medium"
+                            >
+                              Connect Wallet
+                            </button>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  );
+                }}
+              </ConnectButton.Custom>
+            </div>
           )}
         </div>
+      )}
+
+      {/* Click outside to close dropdown */}
+      {accountMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setAccountMenuOpen(false)}
+        />
       )}
     </nav>
   );
