@@ -79,7 +79,7 @@ export default function DemoPage() {
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Meet real investors from around the world who are building wealth through fractional real estate ownership,
-            starting with as little as $100 and earning passive income from premium properties globally.
+            starting with as little as $10 and earning passive income from premium properties globally.
           </p>
         </div>
 
