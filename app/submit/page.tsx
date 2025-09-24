@@ -1,37 +1,60 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { propertyService } from "@/lib/services/property.services";
+import { useRouter } from "next/navigation"; // Changed from "next/router"
 
-import { useState } from "react"
-import { ArrowLeft, Upload, X, Plus, DollarSign, FileText, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
+import {
+  ArrowLeft,
+  Upload,
+  X,
+  Plus,
+  DollarSign,
+  FileText,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
+import { useRef, useState } from "react";
 
 interface PropertyImage {
-  id: string
-  file: File
-  preview: string
+  id: string;
+  file: File;
+  preview: string;
 }
 
 interface PropertyDocument {
-  id: string
-  file: File
-  name: string
-  type: string
+  id: string;
+  file: File;
+  name: string;
+  type: string;
 }
 
 export default function SubmitAssetPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [images, setImages] = useState<PropertyImage[]>([])
-  const [documents, setDocuments] = useState<PropertyDocument[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const documentInputRef = useRef<HTMLInputElement>(null); // Add this for documents
+
+  const router = useRouter(); // Moved inside the component
+  const [currentStep, setCurrentStep] = useState(1);
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [documents, setDocuments] = useState<PropertyDocument[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -68,15 +91,15 @@ export default function SubmitAssetPage() {
     hasInsurance: false,
     hasPermits: false,
     agreeToTerms: false,
-  })
+  });
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
+    const files = event.target.files;
+    if (!files) return;
 
     const allowedTypes = [
       "image/jpeg",
@@ -86,28 +109,30 @@ export default function SubmitAssetPage() {
       "image/svg+xml",
       "image/x-icon",
       "image/vnd.microsoft.icon",
-    ]
+    ];
 
     Array.from(files).forEach((file) => {
       if (allowedTypes.includes(file.type)) {
-        const id = Math.random().toString(36).substr(2, 9)
-        const preview = URL.createObjectURL(file)
-        setImages((prev) => [...prev, { id, file, preview }])
+        const id = Math.random().toString(36).substr(2, 9);
+        const preview = URL.createObjectURL(file);
+        setImages((prev) => [...prev, { id, file, preview }]);
       } else {
         // Show error for invalid file types
-        alert(`File "${file.name}" is not supported. Please upload only JPEG, PNG, WebP, SVG, or ICO files.`)
+        alert(
+          `File "${file.name}" is not supported. Please upload only JPEG, PNG, WebP, SVG, or ICO files.`
+        );
       }
-    })
+    });
 
-    event.target.value = ""
-  }
+    event.target.value = "";
+  };
 
   const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
+    const files = event.target.files;
+    if (!files) return;
 
     Array.from(files).forEach((file) => {
-      const id = Math.random().toString(36).substr(2, 9)
+      const id = Math.random().toString(36).substr(2, 9);
       setDocuments((prev) => [
         ...prev,
         {
@@ -116,74 +141,136 @@ export default function SubmitAssetPage() {
           name: file.name,
           type: file.type.includes("pdf") ? "PDF" : "Document",
         },
-      ])
-    })
-  }
+      ]);
+    });
+  };
 
   const removeImage = (id: string) => {
     setImages((prev) => {
-      const image = prev.find((img) => img.id === id)
-      if (image) URL.revokeObjectURL(image.preview)
-      return prev.filter((img) => img.id !== id)
-    })
-  }
+      const image = prev.find((img) => img.id === id);
+      if (image) URL.revokeObjectURL(image.preview);
+      return prev.filter((img) => img.id !== id);
+    });
+  };
+
+  const handleChooseImages = () => {
+    fileInputRef.current?.click();
+  };
 
   const removeDocument = (id: string) => {
-    setDocuments((prev) => prev.filter((doc) => doc.id !== id))
-  }
+    setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+  };
 
   const addFeature = (feature: string) => {
     if (feature && !formData.features.includes(feature)) {
       setFormData((prev) => ({
         ...prev,
         features: [...prev.features, feature],
-      }))
+      }));
     }
-  }
+  };
 
   const removeFeature = (feature: string) => {
     setFormData((prev) => ({
       ...prev,
       features: prev.features.filter((f) => f !== feature),
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    // Simulate submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    console.log("Submitting property:", { formData, images, documents })
-    setIsSubmitting(false)
-    // Redirect to success page or admin dashboard
-  }
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const result = await propertyService.submitProperty(
+        formData,
+        images,
+        documents
+      );
+
+      console.log("Property submitted successfully:", result);
+      setSubmitSuccess(true);
+
+      // Redirect to success page or dashboard
+      setTimeout(() => {
+        router.push("/properties/success"); // This now works with App Router
+      }, 2000);
+    } catch (error) {
+      console.error("Submission error:", error);
+      setSubmitError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const isStepValid = (step: number) => {
     switch (step) {
       case 1:
-        return formData.propertyTitle && formData.propertyType && formData.location && formData.description
+        return (
+          formData.propertyTitle &&
+          formData.propertyType &&
+          formData.location &&
+          formData.description
+        );
       case 2:
-        return formData.purchasePrice && formData.requestedValue && formData.minInvestment && formData.expectedYield
+        return (
+          formData.purchasePrice &&
+          formData.requestedValue &&
+          formData.minInvestment &&
+          formData.expectedYield
+        );
       case 3:
-        return images.length > 0
+        return images.length > 0;
       case 4:
-        return documents.length >= 3 // Minimum required documents
+        return documents.length >= 3; // Minimum required documents
       case 5:
-        return formData.ownerName && formData.email && formData.phone
+        return formData.ownerName && formData.email && formData.phone;
       case 6:
-        return formData.hasCleanTitle && formData.hasInsurance && formData.hasPermits && formData.agreeToTerms
+        return (
+          formData.hasCleanTitle &&
+          formData.hasInsurance &&
+          formData.hasPermits &&
+          formData.agreeToTerms
+        );
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   const steps = [
-    { number: 1, title: "Basic Information", description: "Property details and description" },
-    { number: 2, title: "Financial Information", description: "Pricing and revenue details" },
-    { number: 3, title: "Property Images", description: "Upload property photos" },
-    { number: 4, title: "Documents", description: "Legal and financial documents" },
-    { number: 5, title: "Owner Information", description: "Contact and experience details" },
-    { number: 6, title: "Review & Submit", description: "Final review and submission" },
-  ]
+    {
+      number: 1,
+      title: "Basic Information",
+      description: "Property details and description",
+    },
+    {
+      number: 2,
+      title: "Financial Information",
+      description: "Pricing and revenue details",
+    },
+    {
+      number: 3,
+      title: "Property Images",
+      description: "Upload property photos",
+    },
+    {
+      number: 4,
+      title: "Documents",
+      description: "Legal and financial documents",
+    },
+    {
+      number: 5,
+      title: "Owner Information",
+      description: "Contact and experience details",
+    },
+    {
+      number: 6,
+      title: "Review & Submit",
+      description: "Final review and submission",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -192,14 +279,19 @@ export default function SubmitAssetPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-gray-600 hover:text-[#2d3748]">
+              <Link
+                href="/"
+                className="flex items-center text-gray-600 hover:text-[#2d3748]"
+              >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Home
               </Link>
             </div>
             <div className="flex items-center space-x-2">
               <img src="/favicon.ico" alt="REALiFi" className="h-6 w-6" />
-              <span className="text-lg font-bold text-[#2d3748]">Submit Property</span>
+              <span className="text-lg font-bold text-[#2d3748]">
+                Submit Property
+              </span>
             </div>
           </div>
         </div>
@@ -223,14 +315,20 @@ export default function SubmitAssetPage() {
                   {step.number}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-16 h-1 mx-2 ${currentStep > step.number ? "bg-[#d69e2e]" : "bg-gray-200"}`} />
+                  <div
+                    className={`w-16 h-1 mx-2 ${currentStep > step.number ? "bg-[#d69e2e]" : "bg-gray-200"}`}
+                  />
                 )}
               </div>
             ))}
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-[#2d3748]">{steps[currentStep - 1].title}</h2>
-            <p className="text-gray-600">{steps[currentStep - 1].description}</p>
+            <h2 className="text-2xl font-bold text-[#2d3748]">
+              {steps[currentStep - 1].title}
+            </h2>
+            <p className="text-gray-600">
+              {steps[currentStep - 1].description}
+            </p>
           </div>
         </div>
 
@@ -247,14 +345,18 @@ export default function SubmitAssetPage() {
                       id="propertyTitle"
                       placeholder="e.g., Luxury Downtown Apartment Complex"
                       value={formData.propertyTitle}
-                      onChange={(e) => handleInputChange("propertyTitle", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("propertyTitle", e.target.value)
+                      }
                     />
                   </div>
                   <div>
                     <Label htmlFor="propertyType">Property Type *</Label>
                     <Select
                       value={formData.propertyType}
-                      onValueChange={(value) => handleInputChange("propertyType", value)}
+                      onValueChange={(value) =>
+                        handleInputChange("propertyType", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select property type" />
@@ -278,7 +380,9 @@ export default function SubmitAssetPage() {
                       id="location"
                       placeholder="e.g., Manhattan, NY"
                       value={formData.location}
-                      onChange={(e) => handleInputChange("location", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("location", e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -287,7 +391,9 @@ export default function SubmitAssetPage() {
                       id="address"
                       placeholder="Street address"
                       value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("address", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -299,7 +405,9 @@ export default function SubmitAssetPage() {
                     placeholder="Provide a detailed description of the property, its features, location benefits, and investment potential..."
                     rows={4}
                     value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
                   />
                 </div>
 
@@ -310,7 +418,9 @@ export default function SubmitAssetPage() {
                       id="propertySize"
                       placeholder="e.g., 50000"
                       value={formData.propertySize}
-                      onChange={(e) => handleInputChange("propertySize", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("propertySize", e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -319,7 +429,9 @@ export default function SubmitAssetPage() {
                       id="yearBuilt"
                       placeholder="e.g., 2020"
                       value={formData.yearBuilt}
-                      onChange={(e) => handleInputChange("yearBuilt", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("yearBuilt", e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -328,7 +440,9 @@ export default function SubmitAssetPage() {
                       id="units"
                       placeholder="e.g., 24"
                       value={formData.units}
-                      onChange={(e) => handleInputChange("units", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("units", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -348,12 +462,16 @@ export default function SubmitAssetPage() {
                         placeholder="2500000"
                         className="pl-10"
                         value={formData.purchasePrice}
-                        onChange={(e) => handleInputChange("purchasePrice", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("purchasePrice", e.target.value)
+                        }
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="requestedValue">Requested Tokenization Value *</Label>
+                    <Label htmlFor="requestedValue">
+                      Requested Tokenization Value *
+                    </Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                       <Input
@@ -361,7 +479,9 @@ export default function SubmitAssetPage() {
                         placeholder="2500000"
                         className="pl-10"
                         value={formData.requestedValue}
-                        onChange={(e) => handleInputChange("requestedValue", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("requestedValue", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -369,7 +489,9 @@ export default function SubmitAssetPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="minInvestment">Minimum Investment Amount *</Label>
+                    <Label htmlFor="minInvestment">
+                      Minimum Investment Amount *
+                    </Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                       <Input
@@ -377,17 +499,23 @@ export default function SubmitAssetPage() {
                         placeholder="1000"
                         className="pl-10"
                         value={formData.minInvestment}
-                        onChange={(e) => handleInputChange("minInvestment", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("minInvestment", e.target.value)
+                        }
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="expectedYield">Expected Annual Yield (%) *</Label>
+                    <Label htmlFor="expectedYield">
+                      Expected Annual Yield (%) *
+                    </Label>
                     <Input
                       id="expectedYield"
                       placeholder="8.5"
                       value={formData.expectedYield}
-                      onChange={(e) => handleInputChange("expectedYield", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("expectedYield", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -402,12 +530,16 @@ export default function SubmitAssetPage() {
                         placeholder="18750"
                         className="pl-10"
                         value={formData.monthlyRevenue}
-                        onChange={(e) => handleInputChange("monthlyRevenue", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("monthlyRevenue", e.target.value)
+                        }
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="operatingExpenses">Monthly Operating Expenses</Label>
+                    <Label htmlFor="operatingExpenses">
+                      Monthly Operating Expenses
+                    </Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                       <Input
@@ -415,25 +547,39 @@ export default function SubmitAssetPage() {
                         placeholder="5625"
                         className="pl-10"
                         value={formData.operatingExpenses}
-                        onChange={(e) => handleInputChange("operatingExpenses", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("operatingExpenses", e.target.value)
+                        }
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-[#2d3748] mb-2">Calculated Metrics</h4>
+                  <h4 className="font-semibold text-[#2d3748] mb-2">
+                    Calculated Metrics
+                  </h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Annual Revenue</p>
                       <p className="font-medium">
-                        ${formData.monthlyRevenue ? (Number(formData.monthlyRevenue) * 12).toLocaleString() : "0"}
+                        $
+                        {formData.monthlyRevenue
+                          ? (
+                              Number(formData.monthlyRevenue) * 12
+                            ).toLocaleString()
+                          : "0"}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-600">Annual Expenses</p>
                       <p className="font-medium">
-                        ${formData.operatingExpenses ? (Number(formData.operatingExpenses) * 12).toLocaleString() : "0"}
+                        $
+                        {formData.operatingExpenses
+                          ? (
+                              Number(formData.operatingExpenses) * 12
+                            ).toLocaleString()
+                          : "0"}
                       </p>
                     </div>
                     <div>
@@ -442,7 +588,8 @@ export default function SubmitAssetPage() {
                         $
                         {formData.monthlyRevenue && formData.operatingExpenses
                           ? (
-                              (Number(formData.monthlyRevenue) - Number(formData.operatingExpenses)) *
+                              (Number(formData.monthlyRevenue) -
+                                Number(formData.operatingExpenses)) *
                               12
                             ).toLocaleString()
                           : "0"}
@@ -451,9 +598,13 @@ export default function SubmitAssetPage() {
                     <div>
                       <p className="text-gray-600">Cap Rate</p>
                       <p className="font-medium">
-                        {formData.monthlyRevenue && formData.operatingExpenses && formData.requestedValue
+                        {formData.monthlyRevenue &&
+                        formData.operatingExpenses &&
+                        formData.requestedValue
                           ? (
-                              (((Number(formData.monthlyRevenue) - Number(formData.operatingExpenses)) * 12) /
+                              (((Number(formData.monthlyRevenue) -
+                                Number(formData.operatingExpenses)) *
+                                12) /
                                 Number(formData.requestedValue)) *
                               100
                             ).toFixed(2) + "%"
@@ -471,35 +622,43 @@ export default function SubmitAssetPage() {
                 <div className="text-center">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                     <Upload className="h-12 w-12 text-[#2d3748] mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">Upload Property Images</h3>
+                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">
+                      Upload Property Images
+                    </h3>
                     <p className="text-gray-600 mb-4">
-                      Add high-quality photos of your property (exterior, interior, amenities)
+                      Add high-quality photos of your property (exterior,
+                      interior, amenities)
                     </p>
                     <input
+                      ref={fileInputRef}
                       type="file"
                       multiple
                       accept=".jpeg,.jpg,.png,.webp,.svg,.ico"
                       onChange={handleImageUpload}
                       className="hidden"
-                      id="image-upload"
                     />
-                    <label htmlFor="image-upload">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Choose Images
-                      </Button>
-                    </label>
-                    <p className="text-xs text-gray-500 mt-2">Supported formats: JPEG, PNG, WebP, SVG, ICO</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleChooseImages}
+                      className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Choose Images
+                    </Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Choose Images
+                    <p className="text-xs text-gray-500 mt-2">
+                      Supported formats: JPEG, PNG, WebP, SVG, ICO
+                    </p>
                   </div>
                 </div>
 
                 {images.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-[#2d3748] mb-4">Uploaded Images ({images.length})</h4>
+                    <h4 className="font-semibold text-[#2d3748] mb-4">
+                      Uploaded Images ({images.length})
+                    </h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {images.map((image) => (
                         <div key={image.id} className="relative group">
@@ -529,9 +688,12 @@ export default function SubmitAssetPage() {
                   <div className="flex items-start">
                     <AlertCircle className="h-5 w-5 text-[#2d3748] mt-0.5 mr-3" />
                     <div>
-                      <h4 className="font-semibold text-[#2d3748]">Required Documents</h4>
+                      <h4 className="font-semibold text-[#2d3748]">
+                        Required Documents
+                      </h4>
                       <p className="text-[#2d3748] text-sm mt-1">
-                        Please upload the following documents to complete your submission:
+                        Please upload the following documents to complete your
+                        submission:
                       </p>
                       <ul className="text-[#2d3748] text-sm mt-2 space-y-1">
                         <li>• Property deed or title</li>
@@ -548,42 +710,59 @@ export default function SubmitAssetPage() {
                 <div className="text-center">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                     <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">Upload Documents</h3>
-                    <p className="text-gray-600 mb-4">Upload PDF files and other relevant documents</p>
+                    <h3 className="text-lg font-medium text-[#2d3748] mb-2">
+                      Upload Documents
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Upload PDF files and other relevant documents
+                    </p>
                     <input
+                      ref={documentInputRef}
                       type="file"
                       multiple
                       accept=".pdf,.doc,.docx,.xls,.xlsx"
                       onChange={handleDocumentUpload}
                       className="hidden"
-                      id="document-upload"
                     />
-                    <label htmlFor="document-upload">
-                      <Button
-                        variant="outline"
-                        className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Choose Documents
-                      </Button>
-                    </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => documentInputRef.current?.click()}
+                      className="cursor-pointer bg-transparent border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Choose Documents
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Supported formats: JPEG, PNG, WebP, SVG, ICO
+                    </p>
                   </div>
                 </div>
 
                 {documents.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-[#2d3748] mb-4">Uploaded Documents ({documents.length})</h4>
+                    <h4 className="font-semibold text-[#2d3748] mb-4">
+                      Uploaded Documents ({documents.length})
+                    </h4>
                     <div className="space-y-3">
                       {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
                           <div className="flex items-center">
                             <FileText className="h-5 w-5 text-gray-400 mr-3" />
                             <div>
-                              <p className="font-medium text-[#2d3748]">{doc.name}</p>
+                              <p className="font-medium text-[#2d3748]">
+                                {doc.name}
+                              </p>
                               <Badge variant="outline">{doc.type}</Badge>
                             </div>
                           </div>
-                          <button onClick={() => removeDocument(doc.id)} className="text-red-600 hover:text-red-800">
+                          <button
+                            onClick={() => removeDocument(doc.id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
                             <X className="h-4 w-4" />
                           </button>
                         </div>
@@ -604,7 +783,9 @@ export default function SubmitAssetPage() {
                       id="ownerName"
                       placeholder="John Smith"
                       value={formData.ownerName}
-                      onChange={(e) => handleInputChange("ownerName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("ownerName", e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -613,7 +794,9 @@ export default function SubmitAssetPage() {
                       id="companyName"
                       placeholder="ABC Properties LLC"
                       value={formData.companyName}
-                      onChange={(e) => handleInputChange("companyName", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("companyName", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -626,7 +809,9 @@ export default function SubmitAssetPage() {
                       type="email"
                       placeholder="john@example.com"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                     />
                   </div>
                   <div>
@@ -635,18 +820,24 @@ export default function SubmitAssetPage() {
                       id="phone"
                       placeholder="+1 (555) 123-4567"
                       value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("phone", e.target.value)
+                      }
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="yearsExperience">Years of Real Estate Experience</Label>
+                  <Label htmlFor="yearsExperience">
+                    Years of Real Estate Experience
+                  </Label>
                   <Input
                     id="yearsExperience"
                     placeholder="10"
                     value={formData.yearsExperience}
-                    onChange={(e) => handleInputChange("yearsExperience", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("yearsExperience", e.target.value)
+                    }
                   />
                 </div>
 
@@ -654,7 +845,11 @@ export default function SubmitAssetPage() {
                   <Label>Property Features</Label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {formData.features.map((feature) => (
-                      <Badge key={feature} variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        key={feature}
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         {feature}
                         <button onClick={() => removeFeature(feature)}>
                           <X className="h-3 w-3" />
@@ -667,8 +862,8 @@ export default function SubmitAssetPage() {
                       placeholder="Add a feature (e.g., Pool, Gym, Parking)"
                       onKeyPress={(e) => {
                         if (e.key === "Enter") {
-                          addFeature(e.currentTarget.value)
-                          e.currentTarget.value = ""
+                          addFeature(e.currentTarget.value);
+                          e.currentTarget.value = "";
                         }
                       }}
                     />
@@ -676,9 +871,10 @@ export default function SubmitAssetPage() {
                       type="button"
                       variant="outline"
                       onClick={(e) => {
-                        const input = e.currentTarget.previousElementSibling as HTMLInputElement
-                        addFeature(input.value)
-                        input.value = ""
+                        const input = e.currentTarget
+                          .previousElementSibling as HTMLInputElement;
+                        addFeature(input.value);
+                        input.value = "";
                       }}
                     >
                       Add
@@ -692,40 +888,55 @@ export default function SubmitAssetPage() {
             {currentStep === 6 && (
               <div className="space-y-6">
                 <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-[#2d3748] mb-4">Submission Summary</h3>
+                  <h3 className="text-lg font-semibold text-[#2d3748] mb-4">
+                    Submission Summary
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-medium text-[#2d3748] mb-2">Property Details</h4>
+                      <h4 className="font-medium text-[#2d3748] mb-2">
+                        Property Details
+                      </h4>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="text-gray-600">Title:</span> {formData.propertyTitle}
+                          <span className="text-gray-600">Title:</span>{" "}
+                          {formData.propertyTitle}
                         </p>
                         <p>
-                          <span className="text-gray-600">Type:</span> {formData.propertyType}
+                          <span className="text-gray-600">Type:</span>{" "}
+                          {formData.propertyType}
                         </p>
                         <p>
-                          <span className="text-gray-600">Location:</span> {formData.location}
+                          <span className="text-gray-600">Location:</span>{" "}
+                          {formData.location}
                         </p>
                         <p>
-                          <span className="text-gray-600">Requested Value:</span> $
-                          {Number(formData.requestedValue).toLocaleString()}
+                          <span className="text-gray-600">
+                            Requested Value:
+                          </span>{" "}
+                          ${Number(formData.requestedValue).toLocaleString()}
                         </p>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-[#2d3748] mb-2">Attachments</h4>
+                      <h4 className="font-medium text-[#2d3748] mb-2">
+                        Attachments
+                      </h4>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="text-gray-600">Images:</span> {images.length} uploaded
+                          <span className="text-gray-600">Images:</span>{" "}
+                          {images.length} uploaded
                         </p>
                         <p>
-                          <span className="text-gray-600">Documents:</span> {documents.length} uploaded
+                          <span className="text-gray-600">Documents:</span>{" "}
+                          {documents.length} uploaded
                         </p>
                         <p>
-                          <span className="text-gray-600">Owner:</span> {formData.ownerName}
+                          <span className="text-gray-600">Owner:</span>{" "}
+                          {formData.ownerName}
                         </p>
                         <p>
-                          <span className="text-gray-600">Contact:</span> {formData.email}
+                          <span className="text-gray-600">Contact:</span>{" "}
+                          {formData.email}
                         </p>
                       </div>
                     </div>
@@ -733,16 +944,21 @@ export default function SubmitAssetPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-[#2d3748]">Legal & Compliance Checklist</h4>
+                  <h4 className="font-semibold text-[#2d3748]">
+                    Legal & Compliance Checklist
+                  </h4>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="hasCleanTitle"
                       checked={formData.hasCleanTitle}
-                      onCheckedChange={(checked) => handleInputChange("hasCleanTitle", checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("hasCleanTitle", checked as boolean)
+                      }
                     />
                     <Label htmlFor="hasCleanTitle">
-                      I confirm that the property has a clean title with no liens or encumbrances
+                      I confirm that the property has a clean title with no
+                      liens or encumbrances
                     </Label>
                   </div>
 
@@ -750,38 +966,86 @@ export default function SubmitAssetPage() {
                     <Checkbox
                       id="hasInsurance"
                       checked={formData.hasInsurance}
-                      onCheckedChange={(checked) => handleInputChange("hasInsurance", checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("hasInsurance", checked as boolean)
+                      }
                     />
-                    <Label htmlFor="hasInsurance">The property is fully insured and coverage is up to date</Label>
+                    <Label htmlFor="hasInsurance">
+                      The property is fully insured and coverage is up to date
+                    </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="hasPermits"
                       checked={formData.hasPermits}
-                      onCheckedChange={(checked) => handleInputChange("hasPermits", checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("hasPermits", checked as boolean)
+                      }
                     />
-                    <Label htmlFor="hasPermits">All necessary permits and licenses are current and valid</Label>
+                    <Label htmlFor="hasPermits">
+                      All necessary permits and licenses are current and valid
+                    </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="agreeToTerms"
                       checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("agreeToTerms", checked as boolean)
+                      }
                     />
-                    <Label htmlFor="agreeToTerms">I agree to the Terms of Service and Privacy Policy</Label>
+                    <Label htmlFor="agreeToTerms">
+                      I agree to the Terms of Service and Privacy Policy
+                    </Label>
                   </div>
                 </div>
 
                 <div className="bg-[#d69e2e] bg-opacity-10 p-4 rounded-lg">
+                  {submitError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center">
+                        <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                        <div>
+                          <h4 className="text-red-800 font-semibold">
+                            Submission Failed
+                          </h4>
+                          <p className="text-red-700 text-sm">{submitError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {submitSuccess && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center">
+                        <div className="h-5 w-5 bg-green-600 rounded-full flex items-center justify-center mr-2">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                        <div>
+                          <h4 className="text-green-800 font-semibold">
+                            Submission Successful!
+                          </h4>
+                          <p className="text-green-700 text-sm">
+                            Your property has been submitted for review.
+                            Redirecting...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-start">
                     <AlertCircle className="h-5 w-5 text-[#d69e2e] mt-0.5 mr-3" />
                     <div>
-                      <h4 className="font-semibold text-[#2d3748]">Review Process</h4>
+                      <h4 className="font-semibold text-[#2d3748]">
+                        Review Process
+                      </h4>
                       <p className="text-[#2d3748] text-sm mt-1">
-                        Your submission will be reviewed by our team within 5-7 business days. You will receive email
-                        updates on the status of your application.
+                        Your submission will be reviewed by our team within 5-7
+                        business days. You will receive email updates on the
+                        status of your application.
                       </p>
                     </div>
                   </div>
@@ -821,5 +1085,5 @@ export default function SubmitAssetPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
