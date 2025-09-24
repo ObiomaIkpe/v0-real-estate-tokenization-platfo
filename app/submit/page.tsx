@@ -274,29 +274,6 @@ export default function SubmitAssetPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="flex items-center text-gray-600 hover:text-[#2d3748]"
-              >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back to Home
-              </Link>
-            </div>
-            <div className="flex items-center space-x-2">
-              <img src="/favicon.ico" alt="REALiFi" className="h-6 w-6" />
-              <span className="text-lg font-bold text-[#2d3748]">
-                Submit Property
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Steps */}
         <div className="mb-8">
@@ -345,6 +322,7 @@ export default function SubmitAssetPage() {
                       id="propertyTitle"
                       placeholder="e.g., Luxury Downtown Apartment Complex"
                       value={formData.propertyTitle}
+                      type="text"
                       onChange={(e) =>
                         handleInputChange("propertyTitle", e.target.value)
                       }

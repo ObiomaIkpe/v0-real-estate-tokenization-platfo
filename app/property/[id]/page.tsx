@@ -1,15 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ArrowLeft, MapPin, TrendingUp, Users, Calendar, Shield, ExternalLink, Heart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useState } from "react";
+import {
+  ArrowLeft,
+  MapPin,
+  TrendingUp,
+  Users,
+  Calendar,
+  Shield,
+  ExternalLink,
+  Heart,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 // Mock property data
 const propertyData = {
@@ -57,56 +66,31 @@ const propertyData = {
       { name: "Insurance Policy", type: "PDF", verified: false },
     ],
   },
-}
+};
 
 export default function PropertyDetailsPage() {
-  const params = useParams()
-  const propertyId = params.id as string
-  const property = propertyData[propertyId as keyof typeof propertyData]
+  const params = useParams();
+  const propertyId = params.id as string;
+  const property = propertyData[propertyId as keyof typeof propertyData];
 
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [investmentAmount, setInvestmentAmount] = useState("")
-  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [investmentAmount, setInvestmentAmount] = useState("");
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   if (!property) {
-    return <div>Property not found</div>
+    return <div>Property not found</div>;
   }
 
-  const tokensFromInvestment = investmentAmount ? Math.floor(Number(investmentAmount) / property.tokenPrice) : 0
+  const tokensFromInvestment = investmentAmount
+    ? Math.floor(Number(investmentAmount) / property.tokenPrice)
+    : 0;
   const ownershipPercentage = tokensFromInvestment
     ? ((tokensFromInvestment / property.totalTokens) * 100).toFixed(3)
-    : "0"
+    : "0";
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-muted-foreground hover:text-primary">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back to Properties
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={isWishlisted ? "text-red-600 border-red-600" : ""}
-              >
-                <Heart className={`h-4 w-4 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
-                {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
-              </Button>
-              <Button variant="outline" size="sm">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -147,30 +131,45 @@ export default function PropertyDetailsPage() {
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{property.title}</h1>
+                  <h1 className="text-3xl font-bold text-foreground mb-2">
+                    {property.title}
+                  </h1>
                   <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-5 w-5 mr-2" />
                     {property.location}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-foreground">${(property.totalValue / 1000000).toFixed(1)}M</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    ${(property.totalValue / 1000000).toFixed(1)}M
+                  </p>
                   <p className="text-muted-foreground">Total Value</p>
                 </div>
               </div>
 
-              <p className="text-foreground text-lg leading-relaxed mb-6">{property.description}</p>
+              <p className="text-foreground text-lg leading-relaxed mb-6">
+                {property.description}
+              </p>
 
               {/* Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Funding Progress</span>
+                  <span className="text-muted-foreground">
+                    Funding Progress
+                  </span>
                   <span className="font-medium">{property.progress}%</span>
                 </div>
                 <Progress value={property.progress} className="h-3" />
                 <div className="flex justify-between text-sm mt-2 text-muted-foreground">
-                  <span>{property.tokensSold.toLocaleString()} tokens sold</span>
-                  <span>{(property.totalTokens - property.tokensSold).toLocaleString()} remaining</span>
+                  <span>
+                    {property.tokensSold.toLocaleString()} tokens sold
+                  </span>
+                  <span>
+                    {(
+                      property.totalTokens - property.tokensSold
+                    ).toLocaleString()}{" "}
+                    remaining
+                  </span>
                 </div>
               </div>
 
@@ -178,12 +177,16 @@ export default function PropertyDetailsPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="text-center p-4 bg-card rounded-lg border">
                   <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{property.expectedYield}%</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {property.expectedYield}%
+                  </p>
                   <p className="text-sm text-muted-foreground">Expected APY</p>
                 </div>
                 <div className="text-center p-4 bg-card rounded-lg border">
                   <Users className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{property.tokensSold}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {property.tokensSold}
+                  </p>
                   <p className="text-sm text-muted-foreground">Investors</p>
                 </div>
                 <div className="text-center p-4 bg-card rounded-lg border">
@@ -234,31 +237,50 @@ export default function PropertyDetailsPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-semibold text-foreground mb-3">Revenue</h4>
+                        <h4 className="font-semibold text-foreground mb-3">
+                          Revenue
+                        </h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Annual Rent</span>
-                            <span className="font-medium">${property.financials.annualRent.toLocaleString()}</span>
+                            <span className="text-muted-foreground">
+                              Annual Rent
+                            </span>
+                            <span className="font-medium">
+                              ${property.financials.annualRent.toLocaleString()}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Monthly Rent</span>
-                            <span className="font-medium">${property.financials.monthlyRent.toLocaleString()}</span>
+                            <span className="text-muted-foreground">
+                              Monthly Rent
+                            </span>
+                            <span className="font-medium">
+                              $
+                              {property.financials.monthlyRent.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-foreground mb-3">Expenses</h4>
+                        <h4 className="font-semibold text-foreground mb-3">
+                          Expenses
+                        </h4>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Operating Expenses</span>
+                            <span className="text-muted-foreground">
+                              Operating Expenses
+                            </span>
                             <span className="font-medium">
-                              ${property.financials.operatingExpenses.toLocaleString()}
+                              $
+                              {property.financials.operatingExpenses.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Net Operating Income</span>
+                            <span className="text-muted-foreground">
+                              Net Operating Income
+                            </span>
                             <span className="font-medium text-primary">
-                              ${property.financials.netOperatingIncome.toLocaleString()}
+                              $
+                              {property.financials.netOperatingIncome.toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -276,7 +298,10 @@ export default function PropertyDetailsPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {property.documents.map((doc, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
                           <div className="flex items-center">
                             <div
                               className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-primary" : "bg-yellow-500"}`}
@@ -305,17 +330,27 @@ export default function PropertyDetailsPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="border-l-4 border-primary pl-4">
-                        <p className="font-medium text-foreground">Property Inspection Completed</p>
-                        <p className="text-sm text-muted-foreground">December 15, 2024</p>
+                        <p className="font-medium text-foreground">
+                          Property Inspection Completed
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          December 15, 2024
+                        </p>
                         <p className="text-foreground mt-2">
-                          Professional inspection completed with excellent results. All systems operational.
+                          Professional inspection completed with excellent
+                          results. All systems operational.
                         </p>
                       </div>
                       <div className="border-l-4 border-primary pl-4">
-                        <p className="font-medium text-foreground">75% Funding Milestone Reached</p>
-                        <p className="text-sm text-muted-foreground">December 10, 2024</p>
+                        <p className="font-medium text-foreground">
+                          75% Funding Milestone Reached
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          December 10, 2024
+                        </p>
                         <p className="text-foreground mt-2">
-                          We've successfully reached 75% of our funding goal. Thank you to all investors!
+                          We've successfully reached 75% of our funding goal.
+                          Thank you to all investors!
                         </p>
                       </div>
                     </div>
@@ -330,12 +365,18 @@ export default function PropertyDetailsPage() {
             <div className="sticky top-24">
               <Card className="shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-xl">Invest in This Property</CardTitle>
-                  <p className="text-muted-foreground">Minimum investment: ${property.minInvestment}</p>
+                  <CardTitle className="text-xl">
+                    Invest in This Property
+                  </CardTitle>
+                  <p className="text-muted-foreground">
+                    Minimum investment: ${property.minInvestment}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Investment Amount ($)</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Investment Amount ($)
+                    </label>
                     <Input
                       type="number"
                       placeholder="1000"
@@ -348,17 +389,32 @@ export default function PropertyDetailsPage() {
                   {investmentAmount && (
                     <div className="bg-muted p-4 rounded-lg space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Tokens to receive:</span>
-                        <span className="font-medium">{tokensFromInvestment}</span>
+                        <span className="text-muted-foreground">
+                          Tokens to receive:
+                        </span>
+                        <span className="font-medium">
+                          {tokensFromInvestment}
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Ownership percentage:</span>
-                        <span className="font-medium">{ownershipPercentage}%</span>
+                        <span className="text-muted-foreground">
+                          Ownership percentage:
+                        </span>
+                        <span className="font-medium">
+                          {ownershipPercentage}%
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Est. annual return:</span>
+                        <span className="text-muted-foreground">
+                          Est. annual return:
+                        </span>
                         <span className="font-medium text-primary">
-                          ${Math.round((Number(investmentAmount) * property.expectedYield) / 100)}
+                          $
+                          {Math.round(
+                            (Number(investmentAmount) *
+                              property.expectedYield) /
+                              100
+                          )}
                         </span>
                       </div>
                     </div>
@@ -366,7 +422,10 @@ export default function PropertyDetailsPage() {
 
                   <Button
                     className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
-                    disabled={!investmentAmount || Number(investmentAmount) < property.minInvestment}
+                    disabled={
+                      !investmentAmount ||
+                      Number(investmentAmount) < property.minInvestment
+                    }
                   >
                     Buy Tokens
                   </Button>
@@ -389,5 +448,5 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

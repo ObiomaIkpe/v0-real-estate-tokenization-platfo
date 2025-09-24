@@ -1,15 +1,21 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { InsuranceDashboard } from "@/components/insurance/insurance-dashboard"
-import type { InsurancePolicy, InsuranceClaim, RiskAssessment } from "@/lib/insurance/insurance-service"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { InsuranceDashboard } from "@/components/insurance/insurance-dashboard";
+import type {
+  InsurancePolicy,
+  InsuranceClaim,
+  RiskAssessment,
+} from "@/lib/insurance/insurance-service";
 
 export default function InsurancePage() {
-  const [policies, setPolicies] = useState<InsurancePolicy[]>([])
-  const [claims, setClaims] = useState<InsuranceClaim[]>([])
-  const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
+  const [claims, setClaims] = useState<InsuranceClaim[]>([]);
+  const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Mock insurance data
@@ -60,7 +66,7 @@ export default function InsurancePage() {
         claims: [],
         documents: ["liability_policy.pdf"],
       },
-    ]
+    ];
 
     const mockClaims: InsuranceClaim[] = [
       {
@@ -74,7 +80,8 @@ export default function InsurancePage() {
         submittedDate: new Date(2024, 2, 15),
         resolvedDate: new Date(2024, 3, 1),
         documents: ["damage_photos.pdf", "repair_estimate.pdf"],
-        adjusterNotes: "Claim approved. Damage confirmed by adjuster inspection.",
+        adjusterNotes:
+          "Claim approved. Damage confirmed by adjuster inspection.",
       },
       {
         id: "claim_2",
@@ -87,7 +94,7 @@ export default function InsurancePage() {
         submittedDate: new Date(2024, 8, 20),
         documents: ["hurricane_damage_report.pdf", "contractor_estimate.pdf"],
       },
-    ]
+    ];
 
     const mockRiskAssessment: RiskAssessment = {
       propertyId: "prop_miami_001",
@@ -117,23 +124,23 @@ export default function InsurancePage() {
         "Regular maintenance inspections",
       ],
       lastAssessment: new Date(2024, 0, 1),
-    }
+    };
 
-    setPolicies(mockPolicies)
-    setClaims(mockClaims)
-    setRiskAssessment(mockRiskAssessment)
-    setLoading(false)
-  }, [])
+    setPolicies(mockPolicies);
+    setClaims(mockClaims);
+    setRiskAssessment(mockRiskAssessment);
+    setLoading(false);
+  }, []);
 
   const handleCreatePolicy = () => {
     // In a real implementation, this would open a policy creation form
-    console.log("Create new insurance policy")
-  }
+    console.log("Create new insurance policy");
+  };
 
   const handleSubmitClaim = () => {
     // In a real implementation, this would open a claim submission form
-    console.log("Submit insurance claim")
-  }
+    console.log("Submit insurance claim");
+  };
 
   if (loading) {
     return (
@@ -143,7 +150,7 @@ export default function InsurancePage() {
           <p className="text-gray-600">Loading insurance dashboard...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!riskAssessment) {
@@ -153,22 +160,11 @@ export default function InsurancePage() {
           <p className="text-gray-600">No risk assessment data available</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-[#2d3748] text-white p-6">
-        <div className="max-w-7xl mx-auto flex items-center gap-3">
-          <Image src="/favicon.ico" alt="REALiFi Logo" width={32} height={32} className="rounded" />
-          <div>
-            <h1 className="text-2xl font-bold">Insurance Protection Center</h1>
-            <p className="text-gray-300">Comprehensive coverage for your real estate investments</p>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto p-6">
         <InsuranceDashboard
           policies={policies}
@@ -179,5 +175,5 @@ export default function InsurancePage() {
         />
       </div>
     </div>
-  )
+  );
 }
