@@ -22,27 +22,27 @@ export default function NavBar() {
 
   // Initialize app metadata
   useEffect(() => {
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.title = appMetadata.name;
-      
+
       let metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
-        metaDescription.setAttribute('content', appMetadata.description);
+        metaDescription.setAttribute("content", appMetadata.description);
       } else {
-        metaDescription = document.createElement('meta');
-        metaDescription.setAttribute('name', 'description');
-        metaDescription.setAttribute('content', appMetadata.description);
-        document.getElementsByTagName('head')[0].appendChild(metaDescription);
+        metaDescription = document.createElement("meta");
+        metaDescription.setAttribute("name", "description");
+        metaDescription.setAttribute("content", appMetadata.description);
+        document.getElementsByTagName("head")[0].appendChild(metaDescription);
       }
 
       let link = document.querySelector('link[rel="icon"]');
       if (link) {
-        link.setAttribute('href', appMetadata.icon);
+        link.setAttribute("href", appMetadata.icon);
       } else {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'icon');
-        link.setAttribute('href', appMetadata.icon);
-        document.getElementsByTagName('head')[0].appendChild(link);
+        link = document.createElement("link");
+        link.setAttribute("rel", "icon");
+        link.setAttribute("href", appMetadata.icon);
+        document.getElementsByTagName("head")[0].appendChild(link);
       }
     }
   }, []);
@@ -75,11 +75,36 @@ export default function NavBar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/explore" className="hover:text-blue-600 transition-colors">
-              Explore
+            <Link
+              href="/demo"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Demo
             </Link>
-            <Link href="/escrow" className="hover:text-blue-600 transition-colors">
-              Escrow
+
+            <Link
+              href="/governance"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Governance
+            </Link>
+            <Link
+              href="/insurance"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Insurance
+            </Link>
+            <Link
+              href="/admin"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Admin
+            </Link>
+            <Link
+              href="/compliance"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Compliance
             </Link>
             {isConnected && (
               <Link
@@ -93,9 +118,9 @@ export default function NavBar() {
             {/* Wallet Connection */}
             {isConnected ? (
               <div className="flex items-center space-x-4">
-                {/* Submit Property Button */}
+                {/* Submit Property Button - Fixed URL */}
                 <Link
-                  href="/submit-property"
+                  href="/submit"
                   className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
                 >
                   Submit Property
@@ -111,7 +136,7 @@ export default function NavBar() {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
                       {address ? address.slice(2, 4).toUpperCase() : "??"}
                     </div>
-                    
+
                     {/* Address and Balance */}
                     <div className="text-left">
                       <div className="text-sm font-medium text-gray-900">
@@ -121,15 +146,20 @@ export default function NavBar() {
                         {formatBalance(balance)} HBAR
                       </div>
                     </div>
-                    
+
                     {/* Dropdown arrow */}
-                    <svg 
-                      className={`w-4 h-4 text-gray-400 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`}
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-4 h-4 text-gray-400 transition-transform ${accountMenuOpen ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </button>
 
@@ -144,24 +174,26 @@ export default function NavBar() {
                           Balance: {formatBalance(balance)} HBAR
                         </div>
                       </div>
-                      
-                      <Link 
-                        href="/portfolio" 
+
+                      <Link
+                        href="/portfolio"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setAccountMenuOpen(false)}
                       >
                         My Portfolio
                       </Link>
-                      
+
                       <button
-                        onClick={() => navigator.clipboard.writeText(address || "")}
+                        onClick={() =>
+                          navigator.clipboard.writeText(address || "")
+                        }
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         Copy Address
                       </button>
-                      
+
                       <hr className="my-2" />
-                      
+
                       <button
                         onClick={disconnectWallet}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -183,22 +215,22 @@ export default function NavBar() {
                   authenticationStatus,
                   mounted,
                 }) => {
-                  const ready = mounted && authenticationStatus !== 'loading';
+                  const ready = mounted && authenticationStatus !== "loading";
                   const connected =
                     ready &&
                     account &&
                     chain &&
                     (!authenticationStatus ||
-                      authenticationStatus === 'authenticated');
+                      authenticationStatus === "authenticated");
 
                   return (
                     <div
                       {...(!ready && {
-                        'aria-hidden': true,
-                        'style': {
+                        "aria-hidden": true,
+                        style: {
                           opacity: 0,
-                          pointerEvents: 'none',
-                          userSelect: 'none',
+                          pointerEvents: "none",
+                          userSelect: "none",
                         },
                       })}
                     >
@@ -229,8 +261,18 @@ export default function NavBar() {
               onClick={() => setMenuOpen(!menuOpen)}
               className="text-gray-600 focus:outline-none hover:text-gray-800 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -240,14 +282,41 @@ export default function NavBar() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden px-4 pb-4 space-y-3 border-t border-gray-100">
-          <Link href="/explore" className="block py-2 hover:text-blue-600 transition-colors">
-            Explore
+          <Link
+            href="/demo"
+            className="block py-2 hover:text-blue-600 transition-colors"
+          >
+            Demo
           </Link>
-          <Link href="/escrow" className="block py-2 hover:text-blue-600 transition-colors">
+          <Link
+            href="/escrow"
+            className="block py-2 hover:text-blue-600 transition-colors"
+          >
             Escrow
           </Link>
+          <Link
+            href="/governance"
+            className="block py-2 hover:text-blue-600 transition-colors"
+          >
+            Governance
+          </Link>
+          <Link
+            href="/insurance"
+            className="block py-2 hover:text-blue-600 transition-colors"
+          >
+            Insurance
+          </Link>
+          <Link
+            href="/compliance"
+            className="block py-2 hover:text-blue-600 transition-colors"
+          >
+            Compliance
+          </Link>
           {isConnected && (
-            <Link href="/portfolio" className="block py-2 hover:text-blue-600 font-semibold transition-colors">
+            <Link
+              href="/portfolio"
+              className="block py-2 hover:text-blue-600 font-semibold transition-colors"
+            >
               My Portfolio
             </Link>
           )}
@@ -270,13 +339,13 @@ export default function NavBar() {
               </div>
 
               <Link
-                href="/submit-property"
+                href="/submit"
                 className="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
                 onClick={() => setMenuOpen(false)}
               >
                 Submit Property
               </Link>
-              
+
               <button
                 onClick={() => navigator.clipboard.writeText(address || "")}
                 className="block w-full text-left px-4 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -306,22 +375,22 @@ export default function NavBar() {
                   authenticationStatus,
                   mounted,
                 }) => {
-                  const ready = mounted && authenticationStatus !== 'loading';
+                  const ready = mounted && authenticationStatus !== "loading";
                   const connected =
                     ready &&
                     account &&
                     chain &&
                     (!authenticationStatus ||
-                      authenticationStatus === 'authenticated');
+                      authenticationStatus === "authenticated");
 
                   return (
                     <div
                       {...(!ready && {
-                        'aria-hidden': true,
-                        'style': {
+                        "aria-hidden": true,
+                        style: {
                           opacity: 0,
-                          pointerEvents: 'none',
-                          userSelect: 'none',
+                          pointerEvents: "none",
+                          userSelect: "none",
                         },
                       })}
                     >
@@ -353,8 +422,8 @@ export default function NavBar() {
 
       {/* Click outside to close dropdown */}
       {accountMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => setAccountMenuOpen(false)}
         />
       )}

@@ -9,6 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  optimizeFonts: false, // Add this line
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
