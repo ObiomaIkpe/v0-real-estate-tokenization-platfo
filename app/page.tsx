@@ -104,7 +104,7 @@ export default function HomePage() {
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-primary-foreground/80 max-w-3xl mx-auto text-pretty">
             Fractional ownership made simple. Invest in premium real estate
-            properties with as little as $250.
+            properties with as little as $10.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button

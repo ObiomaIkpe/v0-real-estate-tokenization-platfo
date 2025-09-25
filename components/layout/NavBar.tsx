@@ -431,13 +431,114 @@
 //   );
 // }
 
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import Link from "next/link";
+// import { ConnectButton } from "@rainbow-me/rainbowkit";
+// import { useAccount, useDisconnect, useBalance } from "wagmi";
+// import { web3AuthService } from "@/lib/services/web3-auth.service";
+
+// const appMetadata = {
+//   name: "REALiFi",
+//   description: "Real Estate Tokenization Platform",
+//   icon: "", // update with your logo
+// };
+
+// export default function NavBar() {
+//   const [menuOpen, setMenuOpen] = useState(false);
+//   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+//   const { address, isConnected, connector } = useAccount();
+//   const { disconnect } = useDisconnect();
+//   const { data: balance } = useBalance({
+//     address: address,
+//   });
+
+//   // State to track if the user has been authenticated with the backend
+//   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+//   // Use a useEffect hook to trigger the backend authentication process
+//   useEffect(() => {
+//     // This effect runs whenever the wallet connection status changes.
+//     const handleAuthentication = async () => {
+//       // Check for an existing token first to avoid unnecessary login calls.
+//       const storedToken = web3AuthService.getToken();
+//       if (storedToken) {
+//         setIsAuthenticated(true);
+//         return;
+//       }
+
+//       // If the user is connected but not yet authenticated, perform the login.
+//       if (isConnected && address && connector) {
+//         try {
+//           const provider = await connector.getProvider();
+//           await web3AuthService.login(provider, address);
+//           setIsAuthenticated(true);
+//         } catch (error) {
+//           console.error("Authentication failed:", error);
+//           // Handle authentication failure, e.g., show an error message.
+//           setIsAuthenticated(false);
+//         }
+//       } else {
+//         // If disconnected, ensure the isAuthenticated state is false.
+//         setIsAuthenticated(false);
+//       }
+//     };
+//     handleAuthentication();
+//   }, [isConnected, address, connector]);
+
+//   // Initialize app metadata (existing code)
+//   useEffect(() => {
+//     if (typeof document !== "undefined") {
+//       document.title = appMetadata.name;
+
+//       let metaDescription = document.querySelector('meta[name="description"]');
+//       if (metaDescription) {
+//         metaDescription.setAttribute("content", appMetadata.description);
+//       } else {
+//         metaDescription = document.createElement("meta");
+//         metaDescription.setAttribute("name", "description");
+//         metaDescription.setAttribute("content", appMetadata.description);
+//         document.getElementsByTagName("head")[0].appendChild(metaDescription);
+//       }
+
+//       let link = document.querySelector('link[rel="icon"]');
+//       if (link) {
+//         link.setAttribute("href", appMetadata.icon);
+//       } else {
+//         link = document.createElement("link");
+//         link.setAttribute("rel", "icon");
+//         link.setAttribute("href", appMetadata.icon);
+//         document.getElementsByTagName("head")[0].appendChild(link);
+//       }
+//     }
+//   }, []);
+
+//   // Updated disconnect function to also clear the token from local storage
+//   const disconnectWallet = () => {
+//     disconnect();
+//     setAccountMenuOpen(false);
+//     localStorage.removeItem("authToken");
+//     localStorage.removeItem("walletAddress");
+//     setIsAuthenticated(false);
+//   };
+
+//   const formatAddress = (addr: string) => {
+//     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+//   };
+
+//   const formatBalance = (balance: any) => {
+//     if (!balance) return "0.00";
+//     const value = parseFloat(balance.formatted);
+//     return value.toFixed(4);
+//   };
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useDisconnect, useBalance } from "wagmi";
-import { web3AuthService } from "@/lib/services/web3-auth.service";
+import { useAccount, useDisconnect, useBalance, useSignMessage } from "wagmi";
 
 const appMetadata = {
   name: "REALiFi",
@@ -445,11 +546,15 @@ const appMetadata = {
   icon: "https://your-app.com/logo.png", // update with your logo
 };
 
+const AUTH_API_BASE_URL =
+  process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:3000/auth";
+
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const { address, isConnected, connector } = useAccount();
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
+  const { signMessageAsync } = useSignMessage();
   const { data: balance } = useBalance({
     address: address,
   });
@@ -457,35 +562,77 @@ export default function NavBar() {
   // State to track if the user has been authenticated with the backend
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Function to handle authentication with backend
+  const authenticateWithBackend = async (walletAddress: string) => {
+    try {
+      // Step 1: Get message from backend
+      const messageResponse = await fetch(
+        `${AUTH_API_BASE_URL}/message/${walletAddress}`
+      );
+      if (!messageResponse.ok) {
+        throw new Error("Failed to get message from server");
+      }
+      const { message } = await messageResponse.json();
+
+      // Step 2: Sign message using Wagmi
+      const signature = await signMessageAsync({ message });
+
+      // Step 3: Send signature to backend for verification
+      const loginResponse = await fetch(`${AUTH_API_BASE_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ walletAddress, signature }),
+      });
+
+      if (!loginResponse.ok) {
+        const errorData = await loginResponse.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const { token } = await loginResponse.json();
+
+      // Step 4: Store token in localStorage
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("walletAddress", walletAddress);
+
+      return token;
+    } catch (error) {
+      console.error("Backend authentication failed:", error);
+      throw error;
+    }
+  };
+
   // Use a useEffect hook to trigger the backend authentication process
   useEffect(() => {
-    // This effect runs whenever the wallet connection status changes.
     const handleAuthentication = async () => {
-      // Check for an existing token first to avoid unnecessary login calls.
-      const storedToken = web3AuthService.getToken();
-      if (storedToken) {
+      // Check for an existing token first to avoid unnecessary login calls
+      const storedToken = localStorage.getItem("authToken");
+      const storedAddress = localStorage.getItem("walletAddress");
+
+      if (storedToken && storedAddress === address) {
         setIsAuthenticated(true);
         return;
       }
 
-      // If the user is connected but not yet authenticated, perform the login.
-      if (isConnected && address && connector) {
+      // If the user is connected but not yet authenticated, perform the login
+      if (isConnected && address) {
         try {
-          const provider = await connector.getProvider();
-          await web3AuthService.login(provider, address);
+          await authenticateWithBackend(address);
           setIsAuthenticated(true);
         } catch (error) {
           console.error("Authentication failed:", error);
-          // Handle authentication failure, e.g., show an error message.
           setIsAuthenticated(false);
         }
       } else {
-        // If disconnected, ensure the isAuthenticated state is false.
+        // If disconnected, ensure the isAuthenticated state is false
         setIsAuthenticated(false);
       }
     };
+
     handleAuthentication();
-  }, [isConnected, address, connector]);
+  }, [isConnected, address, signMessageAsync]);
 
   // Initialize app metadata (existing code)
   useEffect(() => {

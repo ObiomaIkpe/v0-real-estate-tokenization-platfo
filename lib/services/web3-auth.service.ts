@@ -1,7 +1,5 @@
 import { ethers, BrowserProvider } from "ethers";
 
-// A placeholder for the backend URL.
-// In a real application, this would be an environment variable.
 const AUTH_API_BASE_URL = "http://localhost:3000/auth";
 
 /**
