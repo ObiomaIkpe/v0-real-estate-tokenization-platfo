@@ -139,7 +139,7 @@ export default function AdminDashboard() {
       case "pending_review":
         return "bg-yellow-100 text-yellow-800";
       case "under_review":
-        return "bg-blue-100 text-blue-800";
+        return "bg-yellow-100 text-yellow-800";
       case "approved":
         return "bg-green-100 text-green-800";
       case "rejected":
@@ -167,34 +167,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="flex items-center space-x-2">
-                <Image
-                  src="/favicon.ico"
-                  alt="REALiFi Logo"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
-                />
-                <span className="text-xl font-bold text-foreground">
-                  REALiFi Admin
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="text-primary border-primary">
-                Admin Access
-              </Badge>
-              <Button variant="outline" size="sm">
-                Settings
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
