@@ -356,12 +356,36 @@ export default function SubmitAssetPage() {
                     <Label htmlFor="location">City, State *</Label>
                     <Input
                       id="location"
+                      type="text"
                       placeholder="e.g., Manhattan, NY"
                       value={formData.location}
-                      onChange={(e) =>
-                        handleInputChange("location", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleInputChange("location", value);
+
+                        // Optional: Real-time format validation
+                        const isValidFormat = /^[a-zA-Z\s]+,\s*[A-Z]{2}$/.test(
+                          value
+                        );
+                        if (value && !isValidFormat) {
+                          // Show warning or style input differently
+                          console.warn("Invalid location format");
+                        }
+                      }}
+                      className={`${
+                        formData.location &&
+                        !/^[a-zA-Z\s]+,\s*[A-Z]{2}$/.test(formData.location)
+                          ? "border-red-500"
+                          : ""
+                      }`}
+                      required
                     />
+                    {formData.location &&
+                      !/^[a-zA-Z\s]+,\s*[A-Z]{2}$/.test(formData.location) && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Please use format: City, State (e.g., Manhattan, NY)
+                        </p>
+                      )}
                   </div>
                   <div>
                     <Label htmlFor="address">Full Address</Label>
@@ -395,28 +419,39 @@ export default function SubmitAssetPage() {
                     <Input
                       id="propertySize"
                       placeholder="e.g., 50000"
+                      type="number"
                       value={formData.propertySize}
                       onChange={(e) =>
                         handleInputChange("propertySize", e.target.value)
                       }
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="yearBuilt">Year Built</Label>
-                    <Input
-                      id="yearBuilt"
-                      placeholder="e.g., 2020"
-                      value={formData.yearBuilt}
-                      onChange={(e) =>
-                        handleInputChange("yearBuilt", e.target.value)
-                      }
-                    />
-                  </div>
+                  <select
+                    id="yearBuilt"
+                    value={formData.yearBuilt}
+                    onChange={(e) =>
+                      handleInputChange("yearBuilt", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select Year Built</option>
+                    {/* Generate years from current year down to 1800 */}
+                    {Array.from(
+                      { length: new Date().getFullYear() - 1800 + 1 },
+                      (_, i) => new Date().getFullYear() - i
+                    ).map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
                   <div>
                     <Label htmlFor="units">Number of Units</Label>
                     <Input
                       id="units"
                       placeholder="e.g., 24"
+                      type="number"
                       value={formData.units}
                       onChange={(e) =>
                         handleInputChange("units", e.target.value)
@@ -439,6 +474,7 @@ export default function SubmitAssetPage() {
                         id="purchasePrice"
                         placeholder="2500000"
                         className="pl-10"
+                        type="number"
                         value={formData.purchasePrice}
                         onChange={(e) =>
                           handleInputChange("purchasePrice", e.target.value)
@@ -455,6 +491,7 @@ export default function SubmitAssetPage() {
                       <Input
                         id="requestedValue"
                         placeholder="2500000"
+                        type="number"
                         className="pl-10"
                         value={formData.requestedValue}
                         onChange={(e) =>
@@ -475,6 +512,7 @@ export default function SubmitAssetPage() {
                       <Input
                         id="minInvestment"
                         placeholder="1000"
+                        type="number"
                         className="pl-10"
                         value={formData.minInvestment}
                         onChange={(e) =>
@@ -490,6 +528,7 @@ export default function SubmitAssetPage() {
                     <Input
                       id="expectedYield"
                       placeholder="8.5"
+                      type="number"
                       value={formData.expectedYield}
                       onChange={(e) =>
                         handleInputChange("expectedYield", e.target.value)
@@ -506,6 +545,7 @@ export default function SubmitAssetPage() {
                       <Input
                         id="monthlyRevenue"
                         placeholder="18750"
+                        type="number"
                         className="pl-10"
                         value={formData.monthlyRevenue}
                         onChange={(e) =>
@@ -523,6 +563,7 @@ export default function SubmitAssetPage() {
                       <Input
                         id="operatingExpenses"
                         placeholder="5625"
+                        type="number"
                         className="pl-10"
                         value={formData.operatingExpenses}
                         onChange={(e) =>
@@ -797,6 +838,7 @@ export default function SubmitAssetPage() {
                     <Input
                       id="phone"
                       placeholder="+1 (555) 123-4567"
+                      type="text"
                       value={formData.phone}
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
@@ -812,6 +854,7 @@ export default function SubmitAssetPage() {
                   <Input
                     id="yearsExperience"
                     placeholder="10"
+                    type="number"
                     value={formData.yearsExperience}
                     onChange={(e) =>
                       handleInputChange("yearsExperience", e.target.value)
