@@ -162,91 +162,8 @@ export class PropertyService {
     }
   }
 
-  /**
-   * Transform frontend form data to match backend expectations
-   */
-
-  /**
-   * Validate form data before submission
-   */
-  // validateFormData(
-  //   formData: PropertyFormData,
-  //   images: PropertyImage[],
-  //   documents: PropertyDocument[]
-  // ): { isValid: boolean; errors: string[] } {
-  //   const errors: string[] = [];
-
-  //   // Basic Information validation
-  //   if (!formData.propertyTitle?.trim())
-  //     errors.push("Property title is required");
-  //   if (!formData.propertyType?.trim())
-  //     errors.push("Property type is required");
-  //   if (!formData.location?.trim()) errors.push("Location is required");
-  //   if (!formData.address?.trim()) errors.push("Address is required");
-  //   if (!formData.description?.trim()) errors.push("Description is required");
-
-  //   // Financial validation
-  //   if (!formData.purchasePrice || parseFloat(formData.purchasePrice) <= 0) {
-  //     errors.push("Valid purchase price is required");
-  //   }
-  //   if (!formData.requestedValue || parseFloat(formData.requestedValue) <= 0) {
-  //     errors.push("Valid requested value is required");
-  //   }
-  //   if (!formData.minInvestment || parseFloat(formData.minInvestment) <= 0) {
-  //     errors.push("Valid minimum investment is required");
-  //   }
-  //   if (!formData.expectedYield || parseFloat(formData.expectedYield) <= 0) {
-  //     errors.push("Valid expected yield is required");
-  //   }
-
-  //   // Property details validation
-  //   if (!formData.propertySize || parseFloat(formData.propertySize) <= 0) {
-  //     errors.push("Valid property size is required");
-  //   }
-  //   if (!formData.yearBuilt || parseInt(formData.yearBuilt) < 1800) {
-  //     errors.push("Valid year built is required");
-  //   }
-  //   if (!formData.units || parseInt(formData.units) <= 0) {
-  //     errors.push("Valid number of units is required");
-  //   }
-
-  //   // Owner information validation
-  //   if (!formData.ownerName?.trim()) errors.push("Owner name is required");
-  //   if (!formData.companyName?.trim()) errors.push("Company name is required");
-  //   if (!formData.email?.trim() || !this.isValidEmail(formData.email)) {
-  //     errors.push("Valid email is required");
-  //   }
-  //   if (!formData.phone?.trim()) errors.push("Phone number is required");
-  //   if (!formData.yearsExperience || parseInt(formData.yearsExperience) < 0) {
-  //     errors.push("Valid years of experience is required");
-  //   }
-
-  //   // Legal compliance validation
-  //   if (
-  //     !formData.hasCleanTitle ||
-  //     !formData.hasInsurance ||
-  //     !formData.hasPermits ||
-  //     !formData.agreeToTerms
-  //   ) {
-  //     errors.push("All legal compliance requirements must be met");
-  //   }
-
-  //   // File validation
-  //   if (images.length === 0) {
-  //     errors.push("At least one property image is required");
-  //   }
-  //   if (documents.length < 3) {
-  //     errors.push("At least 3 documents are required");
-  //   }
-
-  //   return {
-  //     isValid: errors.length === 0,
-  //     errors,
-  //   };
-  // }
-
   validateFormData(
-    formData: PropertyFormData, // Updated to use PropertyFormData interface
+    formData: PropertyFormData,
     images: PropertyImage[],
     documents: PropertyDocument[]
   ): { isValid: boolean; errors: string[] } {
@@ -365,7 +282,7 @@ export const createHandleSubmit = (
 
       // 4. Redirect after delay
       setTimeout(() => {
-        router.push("/properties/success");
+        router.push("/");
       }, 2000);
     } catch (error) {
       console.error("Submission error:", error);
@@ -377,19 +294,3 @@ export const createHandleSubmit = (
     }
   };
 };
-
-// Usage in your component:
-/*
-import { propertyService, createHandleSubmit } from '../services/propertyService';
-
-// In your component:
-const handleSubmit = createHandleSubmit(
-  formData, 
-  images, 
-  documents,
-  setIsSubmitting,
-  setSubmitError,
-  setSubmitSuccess,
-  router
-);
-*/
