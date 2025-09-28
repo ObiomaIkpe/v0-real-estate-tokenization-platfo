@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { propertyService } from "@/lib/services/property.services";
-import { useRouter } from "next/navigation"; // Changed from "next/router"
+import { useRouter } from "next/navigation";
 
 import {
   ArrowLeft,
@@ -86,7 +86,7 @@ export default function SubmitAssetPage() {
     phone: "",
     yearsExperience: "",
 
-    // Legal & Compliance
+    // Legal & Compliance (keep individual checkboxes for UX)
     hasCleanTitle: false,
     hasInsurance: false,
     hasPermits: false,
@@ -182,8 +182,38 @@ export default function SubmitAssetPage() {
     setSubmitError(null);
 
     try {
+      // Transform data using destructuring to remove unwanted fields and add legalCompliance
+      const {
+        hasCleanTitle,
+        hasInsurance,
+        hasPermits,
+        agreeToTerms,
+        ...restFormData
+      } = formData;
+
+      const transformedFormData = {
+        ...restFormData,
+        // Convert 4 separate checkboxes to single boolean for backend
+        legalCompliance:
+          hasCleanTitle && hasInsurance && hasPermits && agreeToTerms,
+      };
+
+      // Validate the transformed data
+      const validation = propertyService.validateFormData(
+        transformedFormData,
+        images,
+        documents
+      );
+
+      if (!validation.isValid) {
+        throw new Error(
+          `Please fix the following: ${validation.errors.join(", ")}`
+        );
+      }
+
+      // Submit to backend with transformed data
       const result = await propertyService.submitProperty(
-        formData,
+        transformedFormData,
         images,
         documents
       );
@@ -191,9 +221,9 @@ export default function SubmitAssetPage() {
       console.log("Property submitted successfully:", result);
       setSubmitSuccess(true);
 
-      // Redirect to success page or dashboard
+      // Redirect to success page after delay
       setTimeout(() => {
-        router.push("/properties/success"); // This now works with App Router
+        router.push("/properties/success");
       }, 2000);
     } catch (error) {
       console.error("Submission error:", error);
