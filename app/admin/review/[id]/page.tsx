@@ -1,534 +1,607 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ArrowLeft, MapPin, DollarSign, TrendingUp, FileText, Shield, Check, X, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import Link from "next/link"
-import { useParams } from "next/navigation"
+  adminService,
+  AdminPropertyDetails,
+} from "@/lib/services/admin.service";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Download,
+  CheckCircle,
+  XCircle,
+  Coins,
+  Eye,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Building,
+  User,
+  Mail,
+  Phone,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
-// Mock detailed asset data for review
-const assetReviewData = {
-  5: {
-    id: 5,
-    title: "Luxury Beachfront Resort",
-    location: "Malibu, CA",
-    owner: "Coastal Properties LLC",
-    submittedDate: "2024-12-10",
-    requestedValue: 8500000,
-    minInvestment: 2000,
-    expectedYield: 7.8,
-    status: "pending_review",
-    images: [
-      "/luxury-beachfront-resort-malibu-exterior.jpg",
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-    ],
-    description:
-      "A premium 150-room beachfront resort featuring luxury amenities, private beach access, and multiple dining venues. Located in prime Malibu location with consistent high occupancy rates.",
-    features: [
-      "150 luxury rooms and suites",
-      "Private beach access",
-      "3 restaurants and 2 bars",
-      "Full-service spa",
-      "Conference facilities",
-      "Valet parking",
-      "Concierge services",
-      "Fitness center and pool",
-    ],
-    financials: {
-      purchasePrice: 8500000,
-      renovationCost: 500000,
-      monthlyRevenue: 750000,
-      annualRevenue: 9000000,
-      operatingExpenses: 5400000,
-      netOperatingIncome: 3600000,
-      capRate: 4.2,
-      projectedAppreciation: 4.5,
-      occupancyRate: 85,
-    },
-    documents: [
-      { name: "Property Deed", type: "PDF", size: "2.4 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Financial Statements (3 years)", type: "PDF", size: "5.1 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Property Inspection Report", type: "PDF", size: "8.7 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Insurance Policy", type: "PDF", size: "1.2 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Environmental Assessment", type: "PDF", size: "3.8 MB", verified: false, uploaded: "2024-12-10" },
-      { name: "Zoning Documentation", type: "PDF", size: "0.9 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Property Management Agreement", type: "PDF", size: "1.5 MB", verified: true, uploaded: "2024-12-10" },
-      { name: "Market Analysis Report", type: "PDF", size: "4.2 MB", verified: false, uploaded: "2024-12-10" },
-    ],
-    ownerInfo: {
-      companyName: "Coastal Properties LLC",
-      contactPerson: "Michael Rodriguez",
-      email: "m.rodriguez@coastalprops.com",
-      phone: "+1 (555) 123-4567",
-      yearsInBusiness: 12,
-      previousProperties: 8,
-      creditRating: "A+",
-      kycStatus: "verified",
-    },
-    riskAssessment: {
-      marketRisk: "Medium",
-      liquidityRisk: "Low",
-      operationalRisk: "Low",
-      regulatoryRisk: "Low",
-      overallRisk: "Medium-Low",
-    },
-  },
-}
+export default function PropertyReviewPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [property, setProperty] = useState<AdminPropertyDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-export default function AssetReviewPage() {
-  const params = useParams()
-  const assetId = params.id as string
-  const asset = assetReviewData[assetId as keyof typeof assetReviewData]
+  const propertyId = params.id as string;
 
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [showApproveDialog, setShowApproveDialog] = useState(false)
-  const [showRejectDialog, setShowRejectDialog] = useState(false)
-  const [rejectionReason, setRejectionReason] = useState("")
-  const [approvalNotes, setApprovalNotes] = useState("")
+  // Fetch property details
+  useEffect(() => {
+    async function fetchProperty() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await adminService.getPropertyDetails(propertyId);
+        setProperty(data);
+      } catch (err) {
+        console.error("Error fetching property:", err);
+        setError("Failed to load property details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (!asset) {
-    return <div>Asset not found</div>
+    if (propertyId) {
+      fetchProperty();
+    }
+  }, [propertyId]);
+
+  // Handle admin actions
+  const handleApprove = async () => {
+    try {
+      setActionLoading("approve");
+      await adminService.approveProperty(propertyId);
+
+      // Refresh property data
+      const updatedData = await adminService.getPropertyDetails(propertyId);
+      setProperty(updatedData);
+
+      alert("Property approved successfully!");
+    } catch (error) {
+      console.error("Error approving property:", error);
+      alert("Failed to approve property. Please try again.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleTokenize = async () => {
+    try {
+      setActionLoading("tokenize");
+      const result = await adminService.tokenizeProperty(propertyId);
+
+      // Refresh property data
+      const updatedData = await adminService.getPropertyDetails(propertyId);
+      setProperty(updatedData);
+
+      alert(
+        `Property tokenized successfully! NFT Metadata: ${result.data.metadataUrl}`
+      );
+    } catch (error) {
+      console.error("Error tokenizing property:", error);
+      alert("Failed to tokenize property. Please try again.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (confirm("Are you sure you want to reject this property?")) {
+      try {
+        setActionLoading("reject");
+        await adminService.rejectProperty(propertyId);
+
+        // Refresh property data
+        const updatedData = await adminService.getPropertyDetails(propertyId);
+        setProperty(updatedData);
+
+        alert("Property rejected.");
+      } catch (error) {
+        console.error("Error rejecting property:", error);
+        alert("Failed to reject property. Please try again.");
+      } finally {
+        setActionLoading(null);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading property details...</p>
+        </div>
+      </div>
+    );
   }
 
-  const handleApprove = () => {
-    console.log(`Approving asset ${asset.id} with notes: ${approvalNotes}`)
-    setShowApproveDialog(false)
-    // Handle approval logic and redirect
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error</div>
+          <p className="text-gray-600 mb-4">{error || "Property not found"}</p>
+          <Button onClick={() => router.push("/admin")}>
+            Back to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
   }
 
-  const handleReject = () => {
-    console.log(`Rejecting asset ${asset.id} with reason: ${rejectionReason}`)
-    setShowRejectDialog(false)
-    // Handle rejection logic and redirect
-  }
-
-  const handleFractionalize = () => {
-    console.log(`Starting fractionalization process for asset ${asset.id}`)
-    // Handle fractionalization logic
-  }
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "approved":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "tokenized":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "rejected":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/admin" className="flex items-center text-muted-foreground hover:text-primary">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back to Admin Dashboard
-              </Link>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/admin")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {property.propertyTitle}
+              </h1>
+              <div className="flex items-center gap-4 text-gray-600">
+                <span className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  {property.location}
+                </span>
+                <span className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Submitted: {new Date(property.createdAt).toLocaleDateString()}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Badge className="bg-yellow-100 text-yellow-800">Pending Review</Badge>
-              <Button variant="outline" size="sm">
-                Export Report
-              </Button>
-            </div>
+            <Badge
+              className={`${getStatusColor(property.status)} border text-sm px-3 py-1`}
+            >
+              {property.status.charAt(0).toUpperCase() +
+                property.status.slice(1)}
+            </Badge>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Asset Details */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Image Gallery */}
-            <div className="space-y-4">
-              <div className="relative">
-                <img
-                  src={asset.images[selectedImage] || "/placeholder.svg"}
-                  alt={asset.title}
-                  className="w-full h-96 object-cover rounded-lg"
-                />
-                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
-                  {asset.expectedYield}% Expected APY
-                </Badge>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {asset.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative rounded-lg overflow-hidden ${
-                      selectedImage === index ? "ring-2 ring-primary" : ""
-                    }`}
-                  >
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`${asset.title} ${index + 1}`}
-                      className="w-full h-20 object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Asset Information */}
-            <div>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{asset.title}</h1>
-                  <div className="flex items-center text-muted-foreground mb-2">
-                    <MapPin className="h-5 w-5 mr-2" />
-                    {asset.location}
+          {/* Left Panel - Property Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Property Images */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Property Images ({property.totalImages})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {property.pinataUrls.images &&
+                property.pinataUrls.images.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {property.pinataUrls.images.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className="relative h-64 rounded-lg overflow-hidden"
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={`Property image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder-property.jpg";
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-muted-foreground">
-                    Submitted by {asset.owner} on {asset.submittedDate}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-foreground">${(asset.requestedValue / 1000000).toFixed(1)}M</p>
-                  <p className="text-muted-foreground">Requested Value</p>
-                </div>
-              </div>
+                ) : (
+                  <p className="text-gray-500">No images uploaded</p>
+                )}
+              </CardContent>
+            </Card>
 
-              <p className="text-foreground text-lg leading-relaxed mb-6">{asset.description}</p>
+            {/* Property Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Property Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Property Type</p>
+                    <p className="font-medium">{property.propertyType}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Size</p>
+                    <p className="font-medium">{property.propertySize} sq ft</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Year Built</p>
+                    <p className="font-medium">{property.yearBuilt}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Units</p>
+                    <p className="font-medium">{property.units}</p>
+                  </div>
+                </div>
 
-              {/* Key Metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="text-center p-4 bg-card rounded-lg border">
-                  <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{asset.expectedYield}%</p>
-                  <p className="text-sm text-muted-foreground">Expected APY</p>
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Full Address</p>
+                  <p className="font-medium">{property.address}</p>
                 </div>
-                <div className="text-center p-4 bg-card rounded-lg border">
-                  <DollarSign className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">${asset.minInvestment}</p>
-                  <p className="text-sm text-muted-foreground">Min Investment</p>
-                </div>
-                <div className="text-center p-4 bg-card rounded-lg border">
-                  <Shield className="h-6 w-6 text-[#2d3748] mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{asset.riskAssessment.overallRisk}</p>
-                  <p className="text-sm text-muted-foreground">Risk Level</p>
-                </div>
-                <div className="text-center p-4 bg-card rounded-lg border">
-                  <FileText className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{asset.documents.length}</p>
-                  <p className="text-sm text-muted-foreground">Documents</p>
-                </div>
-              </div>
-            </div>
 
-            {/* Detailed Review Tabs */}
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="financials">Financials</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
-                <TabsTrigger value="owner">Owner Info</TabsTrigger>
-                <TabsTrigger value="risk">Risk Analysis</TabsTrigger>
-              </TabsList>
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Description</p>
+                  <p className="text-gray-800">{property.description}</p>
+                </div>
 
-              <TabsContent value="overview" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Property Features</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      {asset.features.map((feature, index) => (
-                        <div key={index} className="flex items-center">
-                          <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
-                          <span className="text-foreground">{feature}</span>
-                        </div>
+                {property.features && property.features.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Features</p>
+                    <div className="flex flex-wrap gap-2">
+                      {property.features.map((feature, index) => (
+                        <Badge key={index} variant="outline">
+                          {feature}
+                        </Badge>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-              <TabsContent value="financials" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Financial Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-3">Revenue Metrics</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Annual Revenue</span>
-                            <span className="font-medium">${asset.financials.annualRevenue.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Monthly Revenue</span>
-                            <span className="font-medium">${asset.financials.monthlyRevenue.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Occupancy Rate</span>
-                            <span className="font-medium">{asset.financials.occupancyRate}%</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-3">Investment Metrics</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Cap Rate</span>
-                            <span className="font-medium">{asset.financials.capRate}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">NOI</span>
-                            <span className="font-medium text-primary">
-                              ${asset.financials.netOperatingIncome.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Projected Appreciation</span>
-                            <span className="font-medium">{asset.financials.projectedAppreciation}%</span>
-                          </div>
-                        </div>
-                      </div>
+            {/* Financial Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  Financial Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Purchase Price</p>
+                      <p className="text-xl font-bold">
+                        ${Number(property.purchasePrice).toLocaleString()}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Requested Tokenization Value
+                      </p>
+                      <p className="text-xl font-bold text-blue-600">
+                        ${Number(property.requestedValue).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Minimum Investment
+                      </p>
+                      <p className="font-medium">
+                        ${Number(property.minInvestment).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Expected Annual Yield
+                      </p>
+                      <p className="text-xl font-bold text-green-600">
+                        {property.expectedYield}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Monthly Revenue</p>
+                      <p className="font-medium">
+                        ${Number(property.monthlyRevenue).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Monthly Operating Expenses
+                      </p>
+                      <p className="font-medium">
+                        ${Number(property.operatingExpenses).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              <TabsContent value="documents" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Document Review</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {asset.documents.map((doc, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full mr-3 ${doc.verified ? "bg-primary" : "bg-yellow-500"}`}
-                            ></div>
-                            <div>
-                              <span className="font-medium">{doc.name}</span>
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <Badge variant="outline">{doc.type}</Badge>
-                                <span>{doc.size}</span>
-                                <span>•</span>
-                                <span>{doc.uploaded}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
-                            </Button>
-                            {!doc.verified && (
-                              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                                <Check className="h-4 w-4 mr-2" />
-                                Verify
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+            {/* Owner Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <User className="h-5 w-5 mr-2" />
+                  Owner Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-600">Full Name</p>
+                      <p className="font-medium">{property.ownerName}</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="owner" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Owner Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-3">Company Details</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Company Name</span>
-                            <span className="font-medium">{asset.ownerInfo.companyName}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Contact Person</span>
-                            <span className="font-medium">{asset.ownerInfo.contactPerson}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Years in Business</span>
-                            <span className="font-medium">{asset.ownerInfo.yearsInBusiness}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-3">Track Record</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Previous Properties</span>
-                            <span className="font-medium">{asset.ownerInfo.previousProperties}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Credit Rating</span>
-                            <span className="font-medium text-primary">{asset.ownerInfo.creditRating}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">KYC Status</span>
-                            <Badge className="bg-primary text-primary-foreground">{asset.ownerInfo.kycStatus}</Badge>
-                          </div>
-                        </div>
-                      </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Company</p>
+                      <p className="font-medium">{property.companyName}</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="risk" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Risk Assessment</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {Object.entries(asset.riskAssessment).map(([key, value]) => (
-                        <div key={key} className="flex justify-between items-center">
-                          <span className="text-foreground capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                          <Badge
-                            className={`${
-                              value === "Low"
-                                ? "bg-primary text-primary-foreground"
-                                : value === "Medium" || value === "Medium-Low"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {value}
-                          </Badge>
-                        </div>
-                      ))}
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Years of Experience
+                      </p>
+                      <p className="font-medium">
+                        {property.yearsExperience} years
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                      <a
+                        href={`mailto:${property.email}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {property.email}
+                      </a>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                      <a
+                        href={`tel:${property.phone}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {property.phone}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Right Column - Action Panel */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {/* Review Actions */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-xl">Review Actions</CardTitle>
-                  <p className="text-muted-foreground">Make a decision on this property submission</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
-                        <Check className="h-5 w-5 mr-2" />
-                        Approve Property
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Approve Property Submission</DialogTitle>
-                        <DialogDescription>
-                          This property will be approved and made available for investment.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Textarea
-                        placeholder="Add approval notes (optional)..."
-                        value={approvalNotes}
-                        onChange={(e) => setApprovalNotes(e.target.value)}
-                      />
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
-                          Cancel
-                        </Button>
-                        <Button className="bg-primary hover:bg-primary/90" onClick={handleApprove}>
-                          Approve Property
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+          {/* Right Panel - Actions & IPFS Links */}
+          <div className="space-y-6">
+            {/* Current Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <Badge
+                    className={`${getStatusColor(property.status)} border text-lg px-4 py-2`}
+                  >
+                    {property.status.charAt(0).toUpperCase() +
+                      property.status.slice(1)}
+                  </Badge>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Last updated:{" "}
+                    {new Date(property.updatedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-                  <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="destructive" className="w-full text-lg py-6">
-                        <X className="h-5 w-5 mr-2" />
-                        Reject Property
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Reject Property Submission</DialogTitle>
-                        <DialogDescription>
-                          Please provide a detailed reason for rejecting this property submission.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Textarea
-                        placeholder="Enter detailed rejection reason..."
-                        value={rejectionReason}
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                        required
-                      />
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
-                          Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={handleReject} disabled={!rejectionReason.trim()}>
-                          Reject Property
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+            {/* IPFS Verification Links */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ExternalLink className="h-5 w-5 mr-2" />
+                  IPFS Verification
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {property.pinataUrls.metadata && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <a
+                      href={property.pinataUrls.metadata}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Metadata on IPFS
+                    </a>
+                  </Button>
+                )}
 
-                  <div className="pt-4 border-t">
-                    <Button variant="outline" className="w-full bg-transparent" onClick={handleFractionalize}>
-                      Start Fractionalization
+                {property.ipfsMetadataHash && (
+                  <div className="text-sm">
+                    <p className="text-gray-600 mb-1">Metadata Hash:</p>
+                    <p className="font-mono text-xs bg-gray-100 p-2 rounded break-all">
+                      {property.ipfsMetadataHash}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    disabled={!property.pinataUrls.images?.length}
+                  >
+                    <a
+                      href={property.pinataUrls.images?.[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Images
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    disabled={!property.pinataUrls.documents?.length}
+                  >
+                    <a
+                      href={property.pinataUrls.documents?.[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Documents
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Documents */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Download className="h-5 w-5 mr-2" />
+                  Documents ({property.totalDocuments})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {property.pinataUrls.documents &&
+                property.pinataUrls.documents.length > 0 ? (
+                  <div className="space-y-2">
+                    {property.pinataUrls.documents.map((docUrl, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        asChild
+                      >
+                        <a
+                          href={docUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Document {index + 1}
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No documents uploaded</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Admin Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {property.status === "pending" && (
+                  <>
+                    <Button
+                      onClick={handleApprove}
+                      disabled={actionLoading === "approve"}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      {actionLoading === "approve" ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                      )}
+                      Approve Property
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-2 text-center">Only available after approval</p>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Quick Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Review</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Documents Verified</span>
-                    <span className="font-medium">
-                      {asset.documents.filter((d) => d.verified).length}/{asset.documents.length}
-                    </span>
+                    <Button
+                      onClick={handleReject}
+                      disabled={actionLoading === "reject"}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      {actionLoading === "reject" ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      ) : (
+                        <XCircle className="h-4 w-4 mr-2" />
+                      )}
+                      Reject Property
+                    </Button>
+                  </>
+                )}
+
+                {property.status === "approved" && (
+                  <Button
+                    onClick={handleTokenize}
+                    disabled={actionLoading === "tokenize"}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    {actionLoading === "tokenize" ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <Coins className="h-4 w-4 mr-2" />
+                    )}
+                    Tokenize Property
+                  </Button>
+                )}
+
+                {property.status === "tokenized" && (
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <Coins className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-blue-900">
+                      Property Tokenized
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Ready for NFT minting
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Risk Level</span>
-                    <Badge className="bg-yellow-100 text-yellow-800">{asset.riskAssessment.overallRisk}</Badge>
+                )}
+
+                {property.status === "rejected" && (
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-red-900">
+                      Property Rejected
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Owner KYC</span>
-                    <Badge className="bg-primary text-primary-foreground">Verified</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Expected ROI</span>
-                    <span className="font-medium text-primary">{asset.expectedYield}%</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
