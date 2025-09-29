@@ -223,7 +223,7 @@ export default function SubmitAssetPage() {
 
       // Redirect to success page after delay
       setTimeout(() => {
-        router.push("/properties/success");
+        router.push("/");
       }, 2000);
     } catch (error) {
       console.error("Submission error:", error);

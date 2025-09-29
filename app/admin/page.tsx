@@ -7,6 +7,7 @@ import {
   adminService,
   AdminPropertySummary,
 } from "@/lib/services/admin.service";
+import { mockUSDCABI, mockUSDCAddress } from "@/constants/mockUSDC";
 import { Search, Filter } from "lucide-react";
 import PropertyCard from "@/components/admin/PropertyCard";
 
