@@ -94,7 +94,7 @@ class AdminService {
   async getAllProperties(
     status?: "pending" | "approved" | "tokenized" | "rejected"
   ): Promise<AdminPropertySummary[]> {
-    const url = new URL(`${API_BASE_URL}/api/admin/properties`);
+    const url = new URL(`${API_BASE_URL}/admin/properties`);
     if (status) {
       url.searchParams.append("status", status);
     }
@@ -116,7 +116,7 @@ class AdminService {
   /** Fetches full details for a single property. */
   async getPropertyDetails(propertyId: string): Promise<AdminPropertyDetails> {
     const response = await fetch(
-      `${API_BASE_URL}/api/admin/properties/${propertyId}`,
+      `${API_BASE_URL}/admin/properties/${propertyId}`,
       {
         method: "GET",
         headers: this.getHeaders(),
@@ -133,7 +133,7 @@ class AdminService {
   /** Approves a property submission. */
   async approveProperty(propertyId: string): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/admin/properties/${propertyId}/approve`,
+      `${API_BASE_URL}/admin/properties/${propertyId}/approve`,
       {
         method: "POST", // Using POST for state change action
         headers: this.getHeaders(),
@@ -148,7 +148,7 @@ class AdminService {
   /** Rejects a property submission. */
   async rejectProperty(propertyId: string): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/admin/properties/${propertyId}/reject`,
+      `${API_BASE_URL}/admin/properties/${propertyId}/reject`,
       {
         method: "POST", // Using POST for state change action
         headers: this.getHeaders(),
@@ -170,7 +170,7 @@ class AdminService {
     blockchainData: TokenizePropertyData
   ): Promise<{ success: boolean; data: any }> {
     const response = await fetch(
-      `${API_BASE_URL}/api/admin/properties/${propertyId}/tokenize`,
+      `${API_BASE_URL}/admin/properties/${propertyId}/tokenize`,
       {
         method: "POST", // Using POST for state change action
         headers: this.getHeaders(),
