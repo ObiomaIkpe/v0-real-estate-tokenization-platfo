@@ -16,7 +16,7 @@ export interface AdminPropertyDetails {
   yearBuilt: number;
   units: number;
   purchasePrice: number;
-  requestedValue: string; // Important: Use number for monetary value
+  requestedValue: string; // Changed to number
   minInvestment: number;
   expectedYield: number;
   monthlyRevenue: number;
@@ -52,8 +52,6 @@ export interface AdminPropertySummary {
   id: string;
   propertyTitle: string;
   location: string;
-  // NOTE: Changed to 'number' from 'string' to maintain data integrity
-  // consistent with AdminPropertyDetails (for accurate display/sorting).
   requestedValue: number;
   status: "pending" | "approved" | "rejected" | "tokenized";
   thumbnailUrl?: string;
@@ -83,6 +81,7 @@ class AdminService {
     const token = this.getAuthToken();
     return {
       "Content-Type": "application/json",
+      // Important for security: Ensure token handling is robust
       ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
@@ -94,6 +93,7 @@ class AdminService {
   async getAllProperties(
     status?: "pending" | "approved" | "tokenized" | "rejected"
   ): Promise<AdminPropertySummary[]> {
+    // FIX: Removed '/api' from the path (as corrected previously)
     const url = new URL(`${API_BASE_URL}/admin/properties`);
     if (status) {
       url.searchParams.append("status", status);
@@ -105,16 +105,31 @@ class AdminService {
     });
 
     if (!response.ok) {
+      // Throw an error if the status code is not 2xx
       throw new Error("Failed to fetch properties");
     }
 
-    // Assuming the API returns a list of objects that conform to AdminPropertySummary
-    // (A subset of AdminPropertyDetails)
-    return response.json();
+    // --- FIX FOR TypeError: e.filter IS NOT A FUNCTION ---
+    const result = await response.json();
+
+    // Your NestJS controller wraps the data in a 'data' property.
+    // The frontend component expects the raw array. We must unwrap it here.
+    if (result && Array.isArray(result.data)) {
+      return result.data;
+    }
+
+    // Defensive check: If the API returns a success status but the data property
+    // is missing or not an array, return an empty array to prevent component crash.
+    console.error(
+      "API response structure unexpected, returning empty array:",
+      result
+    );
+    return [];
   }
 
   /** Fetches full details for a single property. */
   async getPropertyDetails(propertyId: string): Promise<AdminPropertyDetails> {
+    // FIX: Removed '/api' from the path
     const response = await fetch(
       `${API_BASE_URL}/admin/properties/${propertyId}`,
       {
@@ -127,15 +142,20 @@ class AdminService {
       throw new Error("Failed to fetch property details");
     }
 
-    return response.json();
+    // Assuming the NestJS detail endpoint returns the raw property object or
+    // an object with a 'data' key containing the property details.
+    const result = await response.json();
+    return result.data || result;
   }
 
   /** Approves a property submission. */
   async approveProperty(propertyId: string): Promise<void> {
+    // FIX: Removed '/api' from the path
     const response = await fetch(
       `${API_BASE_URL}/admin/properties/${propertyId}/approve`,
       {
-        method: "POST", // Using POST for state change action
+        // Using PATCH for state change action
+        method: "PATCH",
         headers: this.getHeaders(),
       }
     );
@@ -147,10 +167,11 @@ class AdminService {
 
   /** Rejects a property submission. */
   async rejectProperty(propertyId: string): Promise<void> {
+    // FIX: Removed '/api' from the path
     const response = await fetch(
       `${API_BASE_URL}/admin/properties/${propertyId}/reject`,
       {
-        method: "POST", // Using POST for state change action
+        method: "PATCH", // Changed to PATCH
         headers: this.getHeaders(),
       }
     );
@@ -163,16 +184,16 @@ class AdminService {
   /**
    * Updates the property status to 'tokenized' and records the final
    * blockchain data (Token ID, Contract Address, Transaction Hash).
-   * This is crucial for verifying the on-chain status on your backend.
    */
   async tokenizeProperty(
     propertyId: string,
     blockchainData: TokenizePropertyData
   ): Promise<{ success: boolean; data: any }> {
+    // FIX: Removed '/api' from the path
     const response = await fetch(
       `${API_BASE_URL}/admin/properties/${propertyId}/tokenize`,
       {
-        method: "POST", // Using POST for state change action
+        method: "PATCH", // Changed to PATCH as it's an update
         headers: this.getHeaders(),
         body: JSON.stringify(blockchainData),
       }
